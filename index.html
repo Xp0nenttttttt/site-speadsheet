@@ -736,6 +736,7 @@
           <button data-view="info">Info</button>
           <button data-view="stats">Statistiques</button>
           <button data-view="progress">Progression</button>
+          <button onclick="window.open('admin.html','_blank')" style="border-color:#b9d2ff;color:#2f7df6">⚙ Admin</button>
         </div>
       </div>
 
@@ -1320,8 +1321,13 @@
 
           points: record.level.points,
 
-          categories: []
+          categories: [],
+
+          _level_id: record.level.level_id
         }));
+
+        // Fusion des données admin (localStorage)
+        mergeAdminData();
 
         // plus dur -> top le plus petit
         levels.sort(
@@ -1345,6 +1351,61 @@
           err
         );
       }
+    }
+
+    function mergeAdminData() {
+      const LS_KEY = 'aredl_admin_levels';
+      let adminData = [];
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) adminData = JSON.parse(raw);
+      } catch (e) { return; }
+
+      // Indexer les données admin par nom de niveau (lowercase)
+      const adminByName = {};
+      adminData.forEach(a => {
+        adminByName[a.name.toLowerCase()] = a;
+      });
+
+      // Appliquer les données admin sur chaque level AREDL
+      levels = levels.map(l => {
+        const a = adminByName[l.name.toLowerCase()];
+        if (!a) return l;
+        return {
+          ...l,
+          image_url: a.image || l.image_url,
+          enjoyment: a.enjoyment > 0 ? a.enjoyment * 2 : l.enjoyment, // étoiles /5 → /10
+          attempts: a.attempts || l.attempts,
+          worst_death: a.worst_death || l.worst_death,
+          completion_date: a.completion_date || l.completion_date,
+          status: a.status === 'unfinished' ? 'active' : 'done',
+          progress: a.status === 'unfinished' ? (a.progress || 50) : 100,
+          categories: a.categories || l.categories,
+          _admin_notes: a.notes || ''
+        };
+      });
+
+      // Ajouter les niveaux custom (ajoutés dans l'admin mais pas dans AREDL)
+      const aredlNames = new Set(levels.map(l => l.name.toLowerCase()));
+      const customs = adminData.filter(a => !aredlNames.has(a.name.toLowerCase()));
+      customs.forEach(a => {
+        levels.push({
+          name: a.name,
+          top_rank: a.position ? '#' + a.position : '#—',
+          difficulty: 'Extreme Demon',
+          image_url: a.image || '',
+          completion_date: a.completion_date || '',
+          attempts: a.attempts || 0,
+          enjoyment: a.enjoyment > 0 ? a.enjoyment * 2 : null,
+          worst_death: a.worst_death || null,
+          progress: a.status === 'unfinished' ? (a.progress || 50) : 100,
+          status: a.status === 'unfinished' ? 'active' : 'done',
+          points: a.points || 0,
+          categories: a.categories || [],
+          _admin_notes: a.notes || '',
+          _custom: true
+        });
+      });
     }
 
     function renderAll() {
