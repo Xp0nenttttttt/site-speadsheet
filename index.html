@@ -1371,7 +1371,13 @@
       if (e.target.id === "search" || e.target.id === "statusFilter" || e.target.id === "sortBy") renderProgress();
     });
 
-    document.addEventListener("DOMContentLoaded", loadData);
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+        loadAREDLData();
+        renderAll();
+      }
+    );
   </script>
 </body>
 
