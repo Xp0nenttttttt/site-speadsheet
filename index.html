@@ -1248,25 +1248,150 @@
     function renderMonthlyTable() { }
     function renderYearlyTable() { }
 
-    async function loadData() {
+    async function loadAREDLData() {
       try {
-        if (CONFIG.supabaseUrl.includes("REPLACE_") || CONFIG.supabaseAnonKey.includes("REPLACE_")) {
-          renderAll();
-          return;
-        }
-        supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
-        const [{ data: profileData, error: pErr }, { data: levelsData, error: lErr }] = await Promise.all([
-          supabaseClient.from("profiles").select("*").eq("slug", CONFIG.profileSlug).maybeSingle(),
-          supabaseClient.from("levels").select("*").eq("profile_slug", CONFIG.profileSlug).order("created_at", { ascending: false })
+        const [userRes, ranksRes] = await Promise.all([
+          fetch("./aredl-user.json"),
+          fetch("./aredl-ranks.json")
         ]);
-        if (!pErr && profileData) profile = profileData;
-        if (!lErr && levelsData?.length) levels = levelsData;
+
+        const user = await userRes.json();
+        const ranks = await ranksRes.json();
+
+        // =========================
+        // PROFIL
+        // =========================
+
+        const profile = {
+          username: user.global_name || user.username,
+          avatar: user.discord_avatar
+            ? `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.discord_avatar}.png?size=512`
+            : "",
+
+          bio: user.description || "",
+
+          globalRank: user.rank?.rank ?? "—",
+          countryRank: user.rank?.country_rank ?? "—",
+          extremesRank: user.rank?.extremes_rank ?? "—",
+
+          points: user.rank?.total_points ?? 0,
+          extremes: user.rank?.extremes ?? 0,
+
+          country: user.country ?? "—",
+          clan: user.clan?.tag ?? "Aucun"
+        };
+
+        // =========================
+        // HEADER / PROFIL
+        // =========================
+
+        const usernameEl = document.getElementById("profile-name");
+        const avatarEl = document.getElementById("profile-avatar");
+        const bioEl = document.getElementById("profile-bio");
+
+        if (usernameEl) usernameEl.textContent = profile.username;
+        if (avatarEl && profile.avatar) avatarEl.src = profile.avatar;
+        if (bioEl) bioEl.textContent = profile.bio;
+
+        // =========================
+        // STATS
+        // =========================
+
+        const setText = (id, value) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = value;
+        };
+
+        setText("aredl-rank", "#" + profile.globalRank);
+        setText("country-rank", "#" + profile.countryRank);
+        setText("extremes-rank", "#" + profile.extremesRank);
+        setText("total-points", profile.points.toLocaleString());
+        setText("extremes-count", profile.extremes);
+
+        // =========================
+        // RECORDS
+        // =========================
+
+        const records = [...user.records]
+          .sort((a, b) => a.level.position - b.level.position);
+
+        const recordsContainer =
+          document.getElementById("records-container");
+
+        if (recordsContainer) {
+          recordsContainer.innerHTML = records
+            .map(
+              record => `
+            <tr>
+              <td>#${record.level.position}</td>
+              <td>${record.level.name}</td>
+              <td>${record.level.points}</td>
+              <td>
+                ${record.video_url
+                  ? `<a href="${record.video_url}" target="_blank">Vidéo</a>`
+                  : "-"
+                }
+              </td>
+            </tr>
+          `
+            )
+            .join("");
+        }
+
+        // =========================
+        // TOP NIVEAUX
+        // =========================
+
+        const topLevelsContainer =
+          document.getElementById("top-levels");
+
+        if (topLevelsContainer) {
+          const bestLevels = records.slice(0, 10);
+
+          topLevelsContainer.innerHTML = bestLevels
+            .map(
+              lvl => `
+            <div class="small-card">
+              <div class="kicker">TOP ${lvl.level.position}</div>
+              <div class="big">${lvl.level.name}</div>
+              <div class="muted">
+                ${lvl.level.points} pts
+              </div>
+            </div>
+          `
+            )
+            .join("");
+        }
+
+        // =========================
+        // TOP 50 AREDL
+        // =========================
+
+        const top50Container =
+          document.getElementById("aredl-top");
+
+        if (top50Container) {
+          top50Container.innerHTML = ranks
+            .slice(0, 50)
+            .map(
+              lvl => `
+            <tr>
+              <td>#${lvl.position}</td>
+              <td>${lvl.name}</td>
+              <td>${lvl.points}</td>
+            </tr>
+          `
+            )
+            .join("");
+        }
+
+        console.log("AREDL chargé avec succès");
       } catch (err) {
-        console.warn("Supabase load failed, using demo data:", err);
-      } finally {
-        renderAll();
+        console.error("Erreur chargement AREDL :", err);
       }
     }
+
+    loadAREDLData();
 
     function renderAll() {
       renderLanding();
