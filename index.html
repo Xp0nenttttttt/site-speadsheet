@@ -818,7 +818,7 @@
               </div>
               <div class="stat">
                 <div class="kicker">AREDL</div>
-                <div class="value blue" id="aredl-rank">—</div>
+                <div class="value blue" id="aredlInfo">—</div>
               </div>
               <div class="stat">
                 <div class="kicker">Pointercrate</div>
@@ -1258,140 +1258,94 @@
         const user = await userRes.json();
         const ranks = await ranksRes.json();
 
-        // =========================
+        // ====================
         // PROFIL
-        // =========================
+        // ====================
 
-        const profile = {
-          username: user.global_name || user.username,
-          avatar: user.discord_avatar
+        profile.display_name =
+          user.global_name || user.username;
+
+        profile.bio =
+          user.description || "";
+
+        profile.image_url =
+          user.discord_avatar
             ? `https://cdn.discordapp.com/avatars/${user.discord_id}/${user.discord_avatar}.png?size=512`
-            : "",
+            : DEMO_PROFILE.image_url;
 
-          bio: user.description || "",
+        profile.country_rank =
+          user.rank?.country_rank ?? null;
 
-          globalRank: user.rank?.rank ?? "—",
-          countryRank: user.rank?.country_rank ?? "—",
-          extremesRank: user.rank?.extremes_rank ?? "—",
+        profile.global_rank =
+          user.rank?.rank ?? null;
 
-          points: user.rank?.total_points ?? 0,
-          extremes: user.rank?.extremes ?? 0,
+        profile.aredl_rank =
+          user.rank?.rank ?? null;
 
-          country: user.country ?? "—",
-          clan: user.clan?.tag ?? "Aucun"
-        };
+        profile.extremes_finished =
+          user.rank?.extremes ?? 0;
 
-        // =========================
-        // HEADER / PROFIL
-        // =========================
+        profile.pointercrate_rank = null;
 
-        const usernameEl = document.getElementById("profile-name");
-        const avatarEl = document.getElementById("profile-avatar");
-        const bioEl = document.getElementById("profile-bio");
+        profile.hardest_title =
+          user.records?.[0]?.level?.name || "—";
 
-        if (usernameEl) usernameEl.textContent = profile.username;
-        if (avatarEl && profile.avatar) avatarEl.src = profile.avatar;
-        if (bioEl) bioEl.textContent = profile.bio;
+        profile.hardest_rank =
+          "#" + (user.records?.[0]?.level?.position || "—");
 
-        // =========================
-        // STATS
-        // =========================
+        // ====================
+        // NIVEAUX
+        // ====================
 
-        const setText = (id, value) => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = value;
-        };
+        levels = (user.records || []).map(record => ({
+          name: record.level.name,
 
-        setText("aredl-rank", "#" + profile.globalRank);
-        setText("country-rank", "#" + profile.countryRank);
-        setText("extremes-rank", "#" + profile.extremesRank);
-        setText("total-points", profile.points.toLocaleString());
-        setText("extremes-count", profile.extremes);
+          top_rank: "#" + record.level.position,
 
-        // =========================
-        // RECORDS
-        // =========================
+          difficulty: "Extreme Demon",
 
-        const records = [...user.records]
-          .sort((a, b) => a.level.position - b.level.position);
+          image_url: "",
 
-        const recordsContainer =
-          document.getElementById("records-container");
+          completion_date: "",
 
-        if (recordsContainer) {
-          recordsContainer.innerHTML = records
-            .map(
-              record => `
-            <tr>
-              <td>#${record.level.position}</td>
-              <td>${record.level.name}</td>
-              <td>${record.level.points}</td>
-              <td>
-                ${record.video_url
-                  ? `<a href="${record.video_url}" target="_blank">Vidéo</a>`
-                  : "-"
-                }
-              </td>
-            </tr>
-          `
-            )
-            .join("");
-        }
+          attempts: record.raw_footage?.attempts || 0,
 
-        // =========================
-        // TOP NIVEAUX
-        // =========================
+          enjoyment: null,
 
-        const topLevelsContainer =
-          document.getElementById("top-levels");
+          worst_death: null,
 
-        if (topLevelsContainer) {
-          const bestLevels = records.slice(0, 10);
+          progress: 100,
 
-          topLevelsContainer.innerHTML = bestLevels
-            .map(
-              lvl => `
-            <div class="small-card">
-              <div class="kicker">TOP ${lvl.level.position}</div>
-              <div class="big">${lvl.level.name}</div>
-              <div class="muted">
-                ${lvl.level.points} pts
-              </div>
-            </div>
-          `
-            )
-            .join("");
-        }
+          status: "done",
 
-        // =========================
-        // TOP 50 AREDL
-        // =========================
+          points: record.level.points,
 
-        const top50Container =
-          document.getElementById("aredl-top");
+          categories: []
+        }));
 
-        if (top50Container) {
-          top50Container.innerHTML = ranks
-            .slice(0, 50)
-            .map(
-              lvl => `
-            <tr>
-              <td>#${lvl.position}</td>
-              <td>${lvl.name}</td>
-              <td>${lvl.points}</td>
-            </tr>
-          `
-            )
-            .join("");
-        }
+        // plus dur -> top le plus petit
+        levels.sort(
+          (a, b) =>
+            parseRank(a.top_rank) -
+            parseRank(b.top_rank)
+        );
 
-        console.log("AREDL chargé avec succès");
+        renderAll();
+
+        console.log(
+          "AREDL chargé :",
+          profile.display_name,
+          levels.length,
+          "records"
+        );
+
       } catch (err) {
-        console.error("Erreur chargement AREDL :", err);
+        console.error(
+          "Erreur chargement AREDL :",
+          err
+        );
       }
     }
-
-    loadAREDLData();
 
     function renderAll() {
       renderLanding();
