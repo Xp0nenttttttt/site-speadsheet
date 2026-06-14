@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AREDL Admin — Spleen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0eeff;
+    --muted: #9090b0;
+    --accent: #7f77dd;
+    --accent2: #534ab7;
+    --accent-glow: rgba(127, 119, 221, 0.15);
+    --danger: #e24b4a;
+    --success: #1d9e75;
+    --warn: #ef9f27;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* Sidebar */
+  aside {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-header .logo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-header .player {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 4px;
+    color: var(--text);
+  }
+
+  .sidebar-header .clan {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  nav { padding: 12px 8px; flex: 1; }
+
+  .nav-section {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin: 12px 0 4px;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: var(--accent-glow); color: var(--accent); font-weight: 500; }
+
+  .nav-btn .icon { font-size: 16px; opacity: 0.8; }
+
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Main */
+  main {
+    flex: 1;
+    padding: 28px 32px;
+    overflow-y: auto;
+    max-width: calc(100% - 220px);
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Stats row */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .stat-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .stat-card .value {
+    font-size: 26px;
+    font-weight: 600;
+    margin-top: 4px;
+    color: var(--text);
+  }
+
+  .stat-card .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .toolbar input[type="text"], .toolbar select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 7px 12px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .toolbar input[type="text"] { width: 220px; }
+  .toolbar input[type="text"]::placeholder { color: var(--muted); }
+  .toolbar input[type="text"]:focus, .toolbar select:focus { border-color: var(--accent2); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent2);
+    color: #fff;
+    border-color: var(--accent2);
+  }
+
+  .btn-primary:hover { background: var(--accent); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+  }
+
+  .btn-ghost:hover { background: var(--surface2); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border-color: rgba(226, 75, 74, 0.3);
+  }
+
+  .btn-danger:hover { background: rgba(226, 75, 74, 0.1); }
+
+  /* Level table */
+  .level-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .level-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 48px 1fr 90px 90px 110px 110px;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s;
+  }
+
+  .level-row:hover { border-color: var(--border2); }
+
+  .level-row.unfinished {
+    border-left: 3px solid var(--warn);
+  }
+
+  .level-row.legacy-row {
+    opacity: 0.6;
+  }
+
+  .level-thumb {
+    width: 48px;
+    height: 36px;
+    border-radius: 4px;
+    background: var(--surface2);
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .level-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .level-info .name {
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .level-info .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .badge-unfinished { background: rgba(239,159,39,0.15); color: var(--warn); }
+  .badge-finished { background: rgba(29,158,117,0.12); color: var(--success); }
+  .badge-2p { background: rgba(127,119,221,0.15); color: var(--accent); }
+  .badge-legacy { background: rgba(144,144,176,0.15); color: var(--muted); }
+
+  .points-val {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .pos-val {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .enjoyment-stars {
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+  }
+
+  .star {
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .star.filled { color: var(--warn); }
+  .star:hover { transform: scale(1.2); }
+
+  .row-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .icon-btn.danger:hover { background: rgba(226,75,74,0.1); color: var(--danger); }
+
+  /* Modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    width: 540px;
+    max-width: 96vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-title { font-size: 16px; font-weight: 600; }
+
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-btn:hover { color: var(--text); }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  .form-input:focus { border-color: var(--accent2); }
+
+  .form-input::placeholder { color: var(--muted); }
+
+  textarea.form-input { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .img-preview-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+
+  .img-preview-zone:hover { border-color: var(--accent2); background: var(--accent-glow); }
+
+  .img-preview-zone img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .img-preview-zone .placeholder-text { color: var(--muted); font-size: 13px; }
+  .img-preview-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  .enjoyment-picker {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .enjoyment-star {
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.1s, color 0.1s;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .enjoyment-star.filled { color: var(--warn); }
+  .enjoyment-star:hover { transform: scale(1.15); }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Export panel */
+  .export-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .section-sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--surface2);
+    color: var(--muted);
+  }
+
+  .scroll-hint { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 200;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform 0.25s, opacity 0.25s;
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-color: rgba(29,158,117,0.4); color: var(--success); }
+
+  /* Data page */
+  .data-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .data-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kv-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kv-row:last-child { border-bottom: none; }
+  .kv-row .k { color: var(--muted); }
+  .kv-row .v { font-weight: 500; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .level-row { grid-template-columns: 40px 1fr 80px 90px; }
+    .level-row .enjoyment-stars, .level-row .pos-val { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sidebar-header">
+    <div class="logo">AREDL Admin</div>
+    <div class="player">Spleen</div>
+    <div class="clan">🌸 Clan Iris</div>
+  </div>
+  <nav>
+    <div class="nav-section">Navigation</div>
+    <button class="nav-btn active" onclick="navigate('levels')" id="nav-levels">
+      <span class="icon">🎮</span> Mes niveaux
+    </button>
+    <button class="nav-btn" onclick="navigate('add')" id="nav-add">
+      <span class="icon">➕</span> Ajouter un niveau
+    </button>
+    <button class="nav-section" style="margin-top:16px">Données</div>
+    <button class="nav-btn" onclick="navigate('profile')" id="nav-profile">
+      <span class="icon">👤</span> Profil
+    </button>
+    <button class="nav-btn" onclick="navigate('export')" id="nav-export">
+      <span class="icon">📦</span> Export JSON
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    Rank #3806 · 3628 pts
+  </div>
+</aside>
+
+<main>
+
+  <!-- Page: Levels -->
+  <div class="page active" id="page-levels">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Mes niveaux</div>
+        <div class="page-subtitle">Complétés + en cours</div>
+      </div>
+      <button class="btn btn-primary" onclick="navigate('add')">+ Ajouter</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Total niveaux</div>
+        <div class="value" id="stat-total">—</div>
+        <div class="sub">dans la liste</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Points totaux</div>
+        <div class="value" id="stat-points">—</div>
+        <div class="sub">AREDL pts</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Rang global</div>
+        <div class="value">#3806</div>
+        <div class="sub">Classement général</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Non terminés</div>
+        <div class="value" id="stat-unfinished">—</div>
+        <div class="sub">en cours</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" placeholder="🔍  Rechercher un niveau..." oninput="renderLevels()">
+      <select id="filter-status" onchange="renderLevels()">
+        <option value="all">Tous</option>
+        <option value="finished">Terminés</option>
+        <option value="unfinished">En cours</option>
+      </select>
+      <select id="filter-sort" onchange="renderLevels()">
+        <option value="position">Position</option>
+        <option value="points">Points</option>
+        <option value="name">Nom</option>
+        <option value="enjoyment">Enjoyment</option>
+        <option value="date">Date</option>
+      </select>
+      <span class="scroll-hint" id="level-count"></span>
+    </div>
+
+    <div class="level-grid" id="level-grid"></div>
+  </div>
+
+  <!-- Page: Add -->
+  <div class="page" id="page-add">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Ajouter un niveau</div>
+        <div class="page-subtitle">Non terminé ou non encore listé</div>
+      </div>
+    </div>
+
+    <div style="max-width: 540px;">
+      <div class="data-section">
+        <div class="data-section-title">Infos du niveau</div>
+
+        <div class="form-group">
+          <label class="form-label">Nom du niveau *</label>
+          <input type="text" class="form-input" id="add-name" placeholder="ex: Sakupen Hell">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Position AREDL</label>
+            <input type="number" class="form-input" id="add-position" placeholder="ex: 712">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Points</label>
+            <input type="number" class="form-input" id="add-points" placeholder="ex: 431">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Level ID (GD)</label>
+            <input type="text" class="form-input" id="add-levelid" placeholder="ex: 23262780">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lien vidéo (YouTube)</label>
+            <input type="text" class="form-input" id="add-video" placeholder="https://youtu.be/...">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Image du niveau (URL ou upload)</label>
+          <div class="img-preview-zone" onclick="document.getElementById('add-img-file').click()">
+            <img id="add-img-preview" alt="">
+            <div class="placeholder-text" id="add-img-placeholder">📷 Cliquer pour uploader ou coller une URL</div>
+          </div>
+          <input type="file" id="add-img-file" accept="image/*" style="display:none" onchange="previewImage(this, 'add-img-preview', 'add-img-placeholder')">
+          <input type="text" class="form-input" id="add-img-url" placeholder="https://... (URL image)" style="margin-top:8px" oninput="applyUrlPreview(this.value, 'add-img-preview', 'add-img-placeholder', 'add-img-data')">
+          <input type="hidden" id="add-img-data">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <select class="form-input" id="add-status">
+            <option value="unfinished">En cours ⏳</option>
+            <option value="finished">Terminé ✅</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notes / commentaire</label>
+          <textarea class="form-input" id="add-notes" placeholder="Infos sur le run, progression..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Enjoyment</label>
+          <div class="enjoyment-picker" id="add-enjoyment-picker">
+            <span class="enjoyment-star" onclick="setEnj('add', 1)">★</span>
+            <span class="enjoyment-star" onclick="setEnj('add', 2)">★</span>
+            <span class="enjoyment-star" onclick="setEnj('add', 3)">★</span>
+            <span class="enjoyment-star" onclick="setEnj('add', 4)">★</span>
+            <span class="enjoyment-star" onclick="setEnj('add', 5)">★</span>
+          </div>
+          <input type="hidden" id="add-enjoyment" value="0">
+        </div>
+
+        <div class="form-group" style="display:flex; gap:8px; justify-content:flex-end; padding-top:8px;">
+          <button class="btn btn-ghost" onclick="navigate('levels')">Annuler</button>
+          <button class="btn btn-primary" onclick="addLevel()">Ajouter le niveau</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Profile -->
+  <div class="page" id="page-profile">
+    <div class="page-header">
+      <div class="page-title">Profil</div>
+    </div>
+    <div class="data-section">
+      <div class="data-section-title">Informations joueur</div>
+      <div class="kv-row"><span class="k">Username</span><span class="v">spleen_w</span></div>
+      <div class="kv-row"><span class="k">Global name</span><span class="v">Spleen</span></div>
+      <div class="kv-row"><span class="k">Clan</span><span class="v">🌸 Iris</span></div>
+      <div class="kv-row"><span class="k">Description</span><span class="v">10 extremes youhou</span></div>
+      <div class="kv-row"><span class="k">Pays</span><span class="v">France 🇫🇷</span></div>
+    </div>
+    <div class="data-section">
+      <div class="data-section-title">Classements</div>
+      <div class="kv-row"><span class="k">Rang global</span><span class="v">#3806</span></div>
+      <div class="kv-row"><span class="k">Rang raw</span><span class="v">#3751</span></div>
+      <div class="kv-row"><span class="k">Rang extremes</span><span class="v">#2767</span></div>
+      <div class="kv-row"><span class="k">Rang France</span><span class="v">#110</span></div>
+      <div class="kv-row"><span class="k">Rang France extremes</span><span class="v">#88</span></div>
+      <div class="kv-row"><span class="k">Points totaux</span><span class="v">3628</span></div>
+      <div class="kv-row"><span class="k">Extremes complétés</span><span class="v">17</span></div>
+    </div>
+  </div>
+
+  <!-- Page: Export -->
+  <div class="page" id="page-export">
+    <div class="page-header">
+      <div class="page-title">Export JSON</div>
+    </div>
+    <div class="data-section">
+      <div class="data-section-title">Données locales (niveaux + images + enjoyment)</div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Ce JSON contient tous tes niveaux avec les données que tu as ajoutées (images, enjoyment, notes). Tu peux l'intégrer dans ton index.html.</p>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <button class="btn btn-primary" onclick="copyExport()">📋 Copier JSON</button>
+        <button class="btn btn-ghost" onclick="downloadExport()">⬇ Télécharger</button>
+      </div>
+      <div class="export-box" id="export-box"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Edit Modal -->
+<div class="modal-backdrop" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="edit-modal-title">Modifier le niveau</div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="edit-id">
+
+    <div class="form-group">
+      <label class="form-label">Nom</label>
+      <input type="text" class="form-input" id="edit-name">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Position AREDL</label>
+        <input type="number" class="form-input" id="edit-position">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Points</label>
+        <input type="number" class="form-input" id="edit-points">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Lien vidéo</label>
+      <input type="text" class="form-input" id="edit-video">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Image (URL ou upload)</label>
+      <div class="img-preview-zone" onclick="document.getElementById('edit-img-file').click()">
+        <img id="edit-img-preview" alt="" style="display:none; width:100%; max-height:140px; object-fit:cover; border-radius:6px;">
+        <div class="placeholder-text" id="edit-img-placeholder">📷 Cliquer pour uploader</div>
+      </div>
+      <input type="file" id="edit-img-file" accept="image/*" style="display:none" onchange="previewImage(this, 'edit-img-preview', 'edit-img-placeholder')">
+      <input type="text" class="form-input" id="edit-img-url" placeholder="https://... (URL directe)" style="margin-top:8px" oninput="applyUrlPreview(this.value, 'edit-img-preview', 'edit-img-placeholder', 'edit-img-data')">
+      <input type="hidden" id="edit-img-data">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Enjoyment</label>
+      <div class="enjoyment-picker" id="edit-enjoyment-picker">
+        <span class="enjoyment-star" onclick="setEnj('edit', 1)">★</span>
+        <span class="enjoyment-star" onclick="setEnj('edit', 2)">★</span>
+        <span class="enjoyment-star" onclick="setEnj('edit', 3)">★</span>
+        <span class="enjoyment-star" onclick="setEnj('edit', 4)">★</span>
+        <span class="enjoyment-star" onclick="setEnj('edit', 5)">★</span>
+      </div>
+      <input type="hidden" id="edit-enjoyment" value="0">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Statut</label>
+      <select class="form-input" id="edit-status">
+        <option value="finished">Terminé ✅</option>
+        <option value="unfinished">En cours ⏳</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" id="edit-notes" placeholder="Commentaire..."></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-danger" onclick="deleteLevel()">Supprimer</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const RAW_RECORDS = [{"id":"3b14ad55-4bbb-471e-8866-a8c2f91a2f45","level":{"id":"a7e53fd8-ad2e-4c19-a9aa-08022e3c481a","name":"Lateral Myst","level_id":63959337,"two_player":false,"position":432,"points":805,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=el0sCnNJ3d4","is_verification":false,"hide_video":false,"created_at":"2026-04-17T12:29:16.986543Z","updated_at":"2026-04-17T12:29:16.986543Z"},{"id":"9c5ad046-7ffd-456a-8118-671f7587a744","level":{"id":"2e4f4156-e426-4671-bdb5-fb6cd0442685","name":"DARKENED","level_id":66085306,"two_player":false,"position":683,"points":460,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=CA05s-944lk","is_verification":false,"hide_video":false,"created_at":"2026-04-23T18:54:07.024741Z","updated_at":"2026-04-23T18:54:07.024741Z"},{"id":"05f0dd12-cc97-455f-8acc-5c7499a3819d","level":{"id":"dc5bc25b-1550-4f08-9d34-471284ed4524","name":"Sakupen Hell","level_id":23262780,"two_player":false,"position":712,"points":431,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=m2kY8ulUQtw","is_verification":false,"hide_video":false,"created_at":"2026-04-08T00:58:25.980362Z","updated_at":"2026-04-08T00:58:25.980362Z"},{"id":"9b723600-2090-4302-9a66-62b9f81755ab","level":{"id":"5ffabbea-d5ec-4c3d-a98f-4b967aec265b","name":"Carcano","level_id":64148732,"two_player":false,"position":736,"points":409,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=pIBos46vNvU","is_verification":false,"hide_video":false,"created_at":"2025-12-04T21:43:07.245346Z","updated_at":"2025-12-04T21:43:07.245346Z"},{"id":"5522ac62-fa52-45ed-9a33-aac8d4092ed7","level":{"id":"de11b897-e713-4e53-91f6-6b4e11e6ed72","name":"moment","level_id":68848817,"two_player":false,"position":770,"points":379,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=918c-boq9_M","is_verification":false,"hide_video":false,"created_at":"2026-04-29T18:36:22.598071Z","updated_at":"2026-04-29T18:36:22.598071Z"},{"id":"e59d3057-0501-47ec-8be3-2817877133c2","level":{"id":"0e6a13b5-3cf7-4750-9156-de516085146d","name":"gravity","level_id":77008332,"two_player":false,"position":778,"points":372,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=voDkpgNAeJ4","is_verification":false,"hide_video":false,"created_at":"2026-05-16T07:40:27.094678Z","updated_at":"2026-05-16T07:40:27.094678Z"},{"id":"0d37c4b2-88da-4711-bd53-5b58009fdf5d","level":{"id":"7a68bd82-91d3-429b-933c-dbf58f49e5c4","name":"Bloodbath","level_id":10565740,"two_player":false,"position":779,"points":372,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=kDaaSbcqh_M","is_verification":false,"hide_video":false,"created_at":"2025-12-04T20:29:33.324989Z","updated_at":"2025-12-04T20:29:33.324988Z"},{"id":"b58ffcde-5b4b-4ae3-8b77-c3d22741949c","level":{"id":"9e13220e-3656-4f3d-a7cd-34cb395288ab","name":"Cupid","level_id":95757926,"two_player":false,"position":1063,"points":182,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=N-LUMHqxHYE","is_verification":false,"hide_video":false,"created_at":"2025-12-14T11:50:02.167160Z","updated_at":"2025-12-14T11:50:02.167160Z"},{"id":"72d40bb2-494b-4c13-93fb-2e34cb60e0f3","level":{"id":"55b68d89-7e79-4ab7-ba07-6eb7ea7b8b15","name":"FISH FISH GODMODE","level_id":89807521,"two_player":false,"position":1328,"points":62,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=FNGjRz6C3F0","is_verification":false,"hide_video":false,"created_at":"2025-12-18T23:15:05.353572Z","updated_at":"2025-12-18T23:15:05.353572Z"},{"id":"f504c522-40c4-4d32-80b7-e51354c9e40b","level":{"id":"31bd60ca-2fe7-4ce8-9ca8-d0d0f0e9db57","name":"Cataclysm","level_id":3979721,"two_player":false,"position":1382,"points":41,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=htVMKewFxMU","is_verification":false,"hide_video":false,"created_at":"2025-10-27T01:36:10.571389Z","updated_at":"2025-10-27T01:36:10.571389Z"},{"id":"975449df-0a1d-4617-b1e2-25dc5ad4a204","level":{"id":"7cd29765-830b-4dd8-968e-f0306a2b9976","name":"Azurite (Sillow)","level_id":62214792,"two_player":false,"position":1408,"points":32,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=GiYzYFSrFpA","is_verification":false,"hide_video":false,"created_at":"2026-06-07T11:39:45.159028Z","updated_at":"2026-06-07T11:39:45.159028Z"},{"id":"ba2b38e1-87ee-432d-83a2-94f326548eee","level":{"id":"7fc1c562-631b-438b-8bae-4af299ece534","name":"Prismatic","level_id":107341811,"two_player":false,"position":1439,"points":22,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=ovOjYT1j2Go","is_verification":false,"hide_video":false,"created_at":"2025-12-04T20:27:21.563626Z","updated_at":"2025-12-04T20:27:21.563626Z"},{"id":"b4b84032-de4a-4bd9-ae8f-25fdebea88fb","level":{"id":"f9dfe1fe-8c9a-4946-b699-c5f23af19026","name":"Bang Gang (2P)","level_id":56916170,"two_player":true,"position":1452,"points":17,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=zaCd3GZkKFI","is_verification":false,"hide_video":false,"created_at":"2026-04-08T02:11:46.242513Z","updated_at":"2026-04-08T02:11:46.242513Z"},{"id":"b712830a-82ea-40e3-b67b-0661628f5735","level":{"id":"5225397b-ba97-40e0-b2c0-c7ff3cffd543","name":"Sweater Weather","level_id":81148582,"two_player":false,"position":1467,"points":12,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=li_-0I4pD7k","is_verification":false,"hide_video":false,"created_at":"2026-04-08T00:31:29.155699Z","updated_at":"2026-04-08T00:31:29.155699Z"},{"id":"b9b2a769-6362-43f0-91b2-ed724a753605","level":{"id":"e31148dd-811a-41b9-97ce-36060707882e","name":"Acu","level_id":61079355,"two_player":false,"position":1469,"points":11,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=BVDDWY6itQE","is_verification":false,"hide_video":false,"created_at":"2025-07-08T22:25:11.267123Z","updated_at":"2025-07-08T22:25:11.267123Z"},{"id":"1666df2e-9746-467b-b71d-c4140e0cf029","level":{"id":"a36b06ea-9973-40c3-a753-8fa5fe8735bc","name":"Through The Decay","level_id":114933189,"two_player":false,"position":1471,"points":11,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=CWkkobnXFe0","is_verification":false,"hide_video":false,"created_at":"2026-04-08T00:29:45.928675Z","updated_at":"2026-04-08T00:29:45.928675Z"},{"id":"bd872a45-f354-4b5a-8456-342c42af2d42","level":{"id":"b9b3d7ed-0cf1-4906-a367-414d59ae083a","name":"Precipitance","level_id":60197839,"two_player":false,"position":1472,"points":10,"legacy":false},"mobile":false,"video_url":"https://www.youtube.com/watch?v=Y7y4I_lWQhc","is_verification":false,"hide_video":false,"created_at":"2026-05-22T12:12:44.217300Z","updated_at":"2026-05-22T12:12:44.217300Z"}];
+
+const LS_KEY = 'aredl_admin_levels';
+
+function initLevels() {
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) return JSON.parse(saved);
+  return RAW_RECORDS.map(r => ({
+    id: r.id,
+    name: r.level.name,
+    level_id: r.level.level_id,
+    position: r.level.position,
+    points: r.level.points,
+    two_player: r.level.two_player,
+    legacy: r.level.legacy,
+    video_url: r.video_url,
+    created_at: r.created_at,
+    status: 'finished',
+    enjoyment: 0,
+    image: null,
+    notes: ''
+  }));
+}
+
+let levels = initLevels();
+
+function save() {
+  localStorage.setItem(LS_KEY, JSON.stringify(levels));
+}
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const nb = document.getElementById('nav-' + page);
+  if (nb) nb.classList.add('active');
+
+  if (page === 'levels') { updateStats(); renderLevels(); }
+  if (page === 'export') renderExport();
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = levels.length;
+  const pts = levels.filter(l => l.status === 'finished').reduce((s, l) => s + l.points, 0);
+  document.getElementById('stat-points').textContent = pts.toLocaleString();
+  document.getElementById('stat-unfinished').textContent = levels.filter(l => l.status === 'unfinished').length;
+}
+
+function renderLevels() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const status = document.getElementById('filter-status').value;
+  const sort = document.getElementById('filter-sort').value;
+
+  let list = levels.filter(l => {
+    if (q && !l.name.toLowerCase().includes(q)) return false;
+    if (status === 'finished' && l.status !== 'finished') return false;
+    if (status === 'unfinished' && l.status !== 'unfinished') return false;
+    return true;
+  });
+
+  list.sort((a, b) => {
+    if (sort === 'position') return a.position - b.position;
+    if (sort === 'points') return b.points - a.points;
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    if (sort === 'enjoyment') return b.enjoyment - a.enjoyment;
+    if (sort === 'date') return new Date(b.created_at) - new Date(a.created_at);
+    return 0;
+  });
+
+  document.getElementById('level-count').textContent = list.length + ' niveau' + (list.length !== 1 ? 'x' : '');
+
+  const grid = document.getElementById('level-grid');
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🎮</div><p>Aucun niveau trouvé.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(l => {
+    const stars = [1,2,3,4,5].map(i =>
+      `<span class="star${l.enjoyment >= i ? ' filled' : ''}" onclick="quickSetEnj('${l.id}', ${i})">★</span>`
+    ).join('');
+
+    const imgContent = l.image
+      ? `<img src="${l.image}" alt="">`
+      : `<span>${l.two_player ? '👥' : '🎮'}</span>`;
+
+    const badges = [];
+    if (l.status === 'unfinished') badges.push('<span class="badge badge-unfinished">En cours</span>');
+    if (l.two_player) badges.push('<span class="badge badge-2p">2P</span>');
+    if (l.legacy) badges.push('<span class="badge badge-legacy">Legacy</span>');
+
+    const dateStr = l.created_at ? new Date(l.created_at).toLocaleDateString('fr-FR') : '—';
+
+    return `<div class="level-row ${l.status === 'unfinished' ? 'unfinished' : ''} ${l.legacy ? 'legacy-row' : ''}">
+      <div class="level-thumb">${imgContent}</div>
+      <div class="level-info">
+        <div class="name">${l.name}</div>
+        <div class="meta">
+          ${badges.join('')}
+          <span class="tag">#${l.position}</span>
+          <span style="color:var(--muted)">${dateStr}</span>
+        </div>
+      </div>
+      <div class="points-val">${l.points} pts</div>
+      <div class="pos-val">#${l.position}</div>
+      <div class="enjoyment-stars">${stars}</div>
+      <div class="row-actions">
+        ${l.video_url ? `<button class="icon-btn" onclick="window.open('${l.video_url}','_blank')" title="Voir vidéo">▶</button>` : ''}
+        <button class="icon-btn" onclick="openEdit('${l.id}')" title="Modifier">✎</button>
+        <button class="icon-btn danger" onclick="confirmDelete('${l.id}')" title="Supprimer">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function quickSetEnj(id, val) {
+  const l = levels.find(x => x.id === id);
+  if (!l) return;
+  l.enjoyment = l.enjoyment === val ? 0 : val;
+  save();
+  renderLevels();
+  toast('Enjoyment mis à jour');
+}
+
+function openEdit(id) {
+  const l = levels.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-name').value = l.name;
+  document.getElementById('edit-position').value = l.position;
+  document.getElementById('edit-points').value = l.points;
+  document.getElementById('edit-video').value = l.video_url || '';
+  document.getElementById('edit-notes').value = l.notes || '';
+  document.getElementById('edit-status').value = l.status;
+  document.getElementById('edit-enjoyment').value = l.enjoyment || 0;
+  document.getElementById('edit-img-url').value = '';
+  document.getElementById('edit-img-data').value = l.image || '';
+  document.getElementById('edit-modal-title').textContent = 'Modifier — ' + l.name;
+
+  const prev = document.getElementById('edit-img-preview');
+  const ph = document.getElementById('edit-img-placeholder');
+  if (l.image) {
+    prev.src = l.image;
+    prev.style.display = 'block';
+    ph.style.display = 'none';
+  } else {
+    prev.src = '';
+    prev.style.display = 'none';
+    ph.style.display = 'block';
+  }
+
+  renderEnjPicker('edit', l.enjoyment || 0);
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+function saveEdit() {
+  const id = document.getElementById('edit-id').value;
+  const l = levels.find(x => x.id === id);
+  if (!l) return;
+  l.name = document.getElementById('edit-name').value.trim() || l.name;
+  l.position = parseInt(document.getElementById('edit-position').value) || l.position;
+  l.points = parseInt(document.getElementById('edit-points').value) || l.points;
+  l.video_url = document.getElementById('edit-video').value.trim();
+  l.notes = document.getElementById('edit-notes').value;
+  l.status = document.getElementById('edit-status').value;
+  l.enjoyment = parseInt(document.getElementById('edit-enjoyment').value) || 0;
+  const imgData = document.getElementById('edit-img-data').value;
+  if (imgData) l.image = imgData;
+  save();
+  closeModal();
+  renderLevels();
+  toast('Niveau mis à jour ✓', 'success');
+}
+
+function deleteLevel() {
+  const id = document.getElementById('edit-id').value;
+  if (!confirm('Supprimer ce niveau ?')) return;
+  levels = levels.filter(x => x.id !== id);
+  save();
+  closeModal();
+  updateStats();
+  renderLevels();
+  toast('Niveau supprimé');
+}
+
+function confirmDelete(id) {
+  const l = levels.find(x => x.id === id);
+  if (!l) return;
+  if (!confirm(`Supprimer "${l.name}" ?`)) return;
+  levels = levels.filter(x => x.id !== id);
+  save();
+  updateStats();
+  renderLevels();
+  toast('Niveau supprimé');
+}
+
+let addEnj = 0;
+function addLevel() {
+  const name = document.getElementById('add-name').value.trim();
+  if (!name) { toast('Le nom est requis'); return; }
+  const newLevel = {
+    id: 'custom_' + Date.now(),
+    name,
+    level_id: parseInt(document.getElementById('add-levelid').value) || 0,
+    position: parseInt(document.getElementById('add-position').value) || 9999,
+    points: parseInt(document.getElementById('add-points').value) || 0,
+    two_player: false,
+    legacy: false,
+    video_url: document.getElementById('add-video').value.trim(),
+    created_at: new Date().toISOString(),
+    status: document.getElementById('add-status').value,
+    enjoyment: parseInt(document.getElementById('add-enjoyment').value) || 0,
+    image: document.getElementById('add-img-data').value || null,
+    notes: document.getElementById('add-notes').value
+  };
+  levels.unshift(newLevel);
+  save();
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-position').value = '';
+  document.getElementById('add-points').value = '';
+  document.getElementById('add-levelid').value = '';
+  document.getElementById('add-video').value = '';
+  document.getElementById('add-notes').value = '';
+  document.getElementById('add-img-data').value = '';
+  document.getElementById('add-img-url').value = '';
+  document.getElementById('add-enjoyment').value = '0';
+  const prev = document.getElementById('add-img-preview');
+  prev.style.display = 'none';
+  document.getElementById('add-img-placeholder').style.display = 'block';
+  setEnj('add', 0);
+  navigate('levels');
+  toast('Niveau ajouté ✓', 'success');
+}
+
+function setEnj(prefix, val) {
+  const curr = parseInt(document.getElementById(prefix + '-enjoyment').value) || 0;
+  const newVal = curr === val ? 0 : val;
+  document.getElementById(prefix + '-enjoyment').value = newVal;
+  renderEnjPicker(prefix, newVal);
+}
+
+function renderEnjPicker(prefix, val) {
+  const stars = document.querySelectorAll('#' + prefix + '-enjoyment-picker .enjoyment-star');
+  stars.forEach((s, i) => {
+    s.classList.toggle('filled', i < val);
+  });
+}
+
+function previewImage(input, previewId, placeholderId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById(previewId);
+    const ph = document.getElementById(placeholderId);
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    ph.style.display = 'none';
+    const prefix = previewId.startsWith('edit') ? 'edit' : 'add';
+    document.getElementById(prefix + '-img-data').value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyUrlPreview(url, previewId, placeholderId, dataId) {
+  if (!url) return;
+  const prev = document.getElementById(previewId);
+  const ph = document.getElementById(placeholderId);
+  prev.src = url;
+  prev.style.display = 'block';
+  ph.style.display = 'none';
+  document.getElementById(dataId).value = url;
+}
+
+function renderExport() {
+  const exportData = {
+    player: "spleen_w",
+    exported_at: new Date().toISOString(),
+    levels: levels
+  };
+  document.getElementById('export-box').textContent = JSON.stringify(exportData, null, 2);
+}
+
+function copyExport() {
+  const text = document.getElementById('export-box').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copié dans le presse-papier ✓', 'success'));
+}
+
+function downloadExport() {
+  const text = document.getElementById('export-box').textContent;
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'aredl_spleen_data.json';
+  a.click();
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => el.className = 'toast', 2500);
+}
+
+document.getElementById('edit-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('edit-modal')) closeModal();
+});
+
+updateStats();
+renderLevels();
+</script>
+</body>
+</html>
