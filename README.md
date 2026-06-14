@@ -6,7 +6,7 @@ Base statique prête pour GitHub Pages, avec :
 - une page Statistiques
 - une page Progression
 - lecture des données depuis Supabase
-
+Peceluja17#
 ## Mise en route
 
 1. Crée un projet Supabase.

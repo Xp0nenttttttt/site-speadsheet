@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,261 +9,650 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <style>
-    :root{
-      --bg:#f5f9ff;
-      --panel:rgba(255,255,255,.82);
-      --panel-solid:#ffffff;
-      --border:#d9e7ff;
-      --text:#0f172a;
-      --muted:#5c6b84;
-      --blue:#2f7df6;
-      --blue2:#6aa8ff;
-      --blue3:#dcebff;
-      --shadow:0 18px 50px rgba(47,125,246,.10);
-      --shadow2:0 8px 24px rgba(15,23,42,.06);
-      --radius:28px;
+    :root {
+      --bg: #f5f9ff;
+      --panel: rgba(255, 255, 255, .82);
+      --panel-solid: #ffffff;
+      --border: #d9e7ff;
+      --text: #0f172a;
+      --muted: #5c6b84;
+      --blue: #2f7df6;
+      --blue2: #6aa8ff;
+      --blue3: #dcebff;
+      --shadow: 0 18px 50px rgba(47, 125, 246, .10);
+      --shadow2: 0 8px 24px rgba(15, 23, 42, .06);
+      --radius: 28px;
     }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(47,125,246,.10), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(106,168,255,.14), transparent 30%),
+        radial-gradient(circle at top left, rgba(47, 125, 246, .10), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(106, 168, 255, .14), transparent 30%),
         var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      overflow-x:hidden;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-    a{color:inherit}
-    .shell{width:min(1240px,92vw); margin:0 auto; padding:28px 0 64px}
-    .hero{
-      background:var(--panel);
-      border:1px solid var(--border);
-      box-shadow:var(--shadow);
-      border-radius:40px;
-      padding:28px;
+
+    a {
+      color: inherit
+    }
+
+    .shell {
+      width: min(1240px, 92vw);
+      margin: 0 auto;
+      padding: 28px 0 64px
+    }
+
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 40px;
+      padding: 28px;
       backdrop-filter: blur(12px);
     }
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
-      margin-bottom:18px;
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
     }
-    .brand{
-      display:flex; align-items:center; gap:12px; font-weight:900;
-      letter-spacing:-0.03em;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
     }
-    .brand-badge{
-      width:42px; height:42px; border-radius:14px; display:grid; place-items:center;
-      background:linear-gradient(135deg,var(--blue),var(--blue2));
-      color:white; box-shadow:0 12px 24px rgba(47,125,246,.22);
+
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: white;
+      box-shadow: 0 12px 24px rgba(47, 125, 246, .22);
     }
-    .brand small{display:block; font-size:12px; color:var(--muted); font-weight:600; letter-spacing:0}
-    .nav{
-      display:flex; flex-wrap:wrap; gap:10px;
+
+    .brand small {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0
     }
-    .nav button,.pill,.ghost{
-      border:1px solid var(--border);
-      background:var(--panel-solid);
-      color:var(--text);
-      border-radius:999px;
-      padding:12px 18px;
-      font:inherit;
-      font-weight:700;
-      cursor:pointer;
-      transition:.2s ease;
-      box-shadow:var(--shadow2);
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-    .nav button:hover,.pill:hover,.ghost:hover{transform:translateY(-1px); border-color:#b9d2ff}
-    .nav button.active,.pill.active{
-      background:linear-gradient(135deg,var(--blue),var(--blue2));
-      color:white;
-      border-color:transparent;
+
+    .nav button,
+    .pill,
+    .ghost {
+      border: 1px solid var(--border);
+      background: var(--panel-solid);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s ease;
+      box-shadow: var(--shadow2);
     }
-    .hero-grid{
-      display:grid;
+
+    .nav button:hover,
+    .pill:hover,
+    .ghost:hover {
+      transform: translateY(-1px);
+      border-color: #b9d2ff
+    }
+
+    .nav button.active,
+    .pill.active {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: white;
+      border-color: transparent;
+    }
+
+    .hero-grid {
+      display: grid;
       grid-template-columns: 1.3fr .9fr;
-      gap:18px;
-      margin-top:18px;
+      gap: 18px;
+      margin-top: 18px;
     }
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--border);
-      box-shadow:var(--shadow2);
-      border-radius:var(--radius);
-      padding:22px;
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow2);
+      border-radius: var(--radius);
+      padding: 22px;
       backdrop-filter: blur(10px);
     }
-    .title{
-      font-size: clamp(2rem, 4vw, 4.2rem);
-      line-height:1;
-      margin:0 0 12px;
-      letter-spacing:-.05em;
-    }
-    .title .accent{
-      color:var(--blue);
-    }
-    .subtitle{
-      margin:0;
-      color:var(--muted);
-      line-height:1.7;
-      max-width:62ch;
-      font-size:1rem;
-    }
-    .hero-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
-    .cta{
-      border:none;
-      background:linear-gradient(135deg,var(--blue),var(--blue2));
-      color:white;
-      box-shadow:0 16px 32px rgba(47,125,246,.18);
-    }
-    .stat-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-    }
-    .stat{
-      background:white;
-      border:1px solid var(--border);
-      border-radius:22px;
-      padding:16px;
-    }
-    .kicker{font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em}
-    .value{margin-top:6px; font-size:1.55rem; font-weight:900; letter-spacing:-.04em}
-    .value.blue{color:var(--blue)}
-    .value.small{font-size:1.15rem}
-    .views{margin-top:18px}
-    .view{display:none}
-    .view.active{display:block; animation:fadeIn .25s ease}
-    @keyframes fadeIn{from{opacity:.4; transform:translateY(8px)} to{opacity:1; transform:translateY(0)}}
 
-    .layout-2{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
-    .layout-3{display:grid; grid-template-columns: repeat(3,1fr); gap:18px}
-    .section-title{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-      margin:0 0 16px;
+    .title {
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height: 1;
+      margin: 0 0 12px;
+      letter-spacing: -.05em;
     }
-    h2{margin:0; font-size:1.2rem; letter-spacing:-.03em}
-    .muted{color:var(--muted)}
-    .profile{
-      display:flex; gap:18px; align-items:center; flex-wrap:wrap;
+
+    .title .accent {
+      color: var(--blue);
     }
-    .avatar{
-      width:104px; height:104px; border-radius:28px; object-fit:cover;
-      border:4px solid white; box-shadow:0 16px 32px rgba(47,125,246,.18);
-      background:#fff;
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 62ch;
+      font-size: 1rem;
     }
-    .profile h3{margin:0; font-size:1.8rem}
-    .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
-    .chip{
-      background:#edf5ff; border:1px solid #d7e7ff; color:#1f4ea0;
-      padding:10px 14px; border-radius:999px; font-weight:700; font-size:.92rem;
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px
     }
-    .chip strong{color:var(--blue)}
-    .input, select{
-      width:100%; border:1px solid var(--border); background:white;
-      padding:12px 14px; border-radius:16px; font:inherit; color:var(--text); outline:none;
-      box-shadow:var(--shadow2);
+
+    .cta {
+      border: none;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: white;
+      box-shadow: 0 16px 32px rgba(47, 125, 246, .18);
     }
-    .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px}
-    .toolbar > *{flex:1 1 180px}
-    .cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
-    .card{
-      background:white; border:1px solid var(--border); border-radius:24px; overflow:hidden;
-      box-shadow:var(--shadow2);
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
-    .card .inner{padding:18px}
-    .card img{width:100%; height:150px; object-fit:cover; display:block; background:#eaf2ff}
-    .card h3{margin:0 0 6px; font-size:1.05rem}
-    .card p{margin:0; color:var(--muted); line-height:1.65; font-size:.95rem}
-    .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
-    .tag{
-      display:inline-flex; align-items:center; gap:6px; padding:7px 10px;
-      border-radius:999px; background:#edf5ff; color:#1f4ea0; border:1px solid #d7e7ff;
-      font-size:.82rem; font-weight:700;
+
+    .stat {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 16px;
     }
-    .status{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:7px 10px; border-radius:999px; font-size:.82rem; font-weight:800;
-      background:#edf5ff; color:#1f4ea0;
+
+    .kicker {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em
     }
-    .status.done{background:#e7f8ef; color:#12704c}
-    .status.active{background:#eef4ff; color:#2f7df6}
-    .status.paused{background:#f2f4f8; color:#55637a}
-    .status.giveup{background:#fff0f0; color:#b42318}
-    .progress{
-      height:10px; background:#e7eefb; border-radius:999px; overflow:hidden; margin-top:10px;
+
+    .value {
+      margin-top: 6px;
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: -.04em
     }
-    .progress > span{
-      display:block; height:100%; border-radius:999px;
-      background:linear-gradient(135deg,var(--blue),var(--blue2));
+
+    .value.blue {
+      color: var(--blue)
     }
-    .grid-tight{display:grid; gap:14px}
-    .small-card{
-      background:white; border:1px solid var(--border); border-radius:22px; padding:16px;
+
+    .value.small {
+      font-size: 1.15rem
     }
-    .small-card .big{font-size:1.3rem; font-weight:900; margin-top:6px}
-    .chart-wrap{height:320px}
-    canvas{max-width:100%}
-    table{width:100%; border-collapse:collapse}
-    th,td{padding:12px 10px; text-align:left; border-bottom:1px solid #edf2ff}
-    th{font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
-    tr:hover td{background:#f8fbff}
-    .landing{
-      position:fixed; inset:0; background:
-        radial-gradient(circle at top left, rgba(47,125,246,.16), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(106,168,255,.18), transparent 34%),
+
+    .views {
+      margin-top: 18px
+    }
+
+    .view {
+      display: none
+    }
+
+    .view.active {
+      display: block;
+      animation: fadeIn .25s ease
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: .4;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .layout-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px
+    }
+
+    .layout-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: -.03em
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .profile {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .avatar {
+      width: 104px;
+      height: 104px;
+      border-radius: 28px;
+      object-fit: cover;
+      border: 4px solid white;
+      box-shadow: 0 16px 32px rgba(47, 125, 246, .18);
+      background: #fff;
+    }
+
+    .profile h3 {
+      margin: 0;
+      font-size: 1.8rem
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px
+    }
+
+    .chip {
+      background: #edf5ff;
+      border: 1px solid #d7e7ff;
+      color: #1f4ea0;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: .92rem;
+    }
+
+    .chip strong {
+      color: var(--blue)
+    }
+
+    .input,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: white;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow2);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .toolbar>* {
+      flex: 1 1 180px
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow2);
+    }
+
+    .card .inner {
+      padding: 18px
+    }
+
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+      background: #eaf2ff
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 1.05rem
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .95rem
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #edf5ff;
+      color: #1f4ea0;
+      border: 1px solid #d7e7ff;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 800;
+      background: #edf5ff;
+      color: #1f4ea0;
+    }
+
+    .status.done {
+      background: #e7f8ef;
+      color: #12704c
+    }
+
+    .status.active {
+      background: #eef4ff;
+      color: #2f7df6
+    }
+
+    .status.paused {
+      background: #f2f4f8;
+      color: #55637a
+    }
+
+    .status.giveup {
+      background: #fff0f0;
+      color: #b42318
+    }
+
+    .progress {
+      height: 10px;
+      background: #e7eefb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress>span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+    }
+
+    .grid-tight {
+      display: grid;
+      gap: 14px
+    }
+
+    .small-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 16px;
+    }
+
+    .small-card .big {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-top: 6px
+    }
+
+    .chart-wrap {
+      height: 320px
+    }
+
+    canvas {
+      max-width: 100%
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #edf2ff
+    }
+
+    th {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted)
+    }
+
+    tr:hover td {
+      background: #f8fbff
+    }
+
+    .landing {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(47, 125, 246, .16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(106, 168, 255, .18), transparent 34%),
         #f7fbff;
-      display:flex; align-items:center; justify-content:center; z-index:9999;
-      transition:opacity .35s ease, transform .35s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity .35s ease, transform .35s ease;
     }
-    .landing.exit{opacity:0; transform:scale(1.02); pointer-events:none}
-    .landing-box{
-      width:min(960px,92vw);
-      background:rgba(255,255,255,.78); backdrop-filter: blur(12px);
-      border:1px solid var(--border); box-shadow:var(--shadow);
-      border-radius:40px; padding:30px;
+
+    .landing.exit {
+      opacity: 0;
+      transform: scale(1.02);
+      pointer-events: none
     }
-    .landing-head{display:grid; grid-template-columns:1.1fr .9fr; gap:18px; align-items:center}
-    .landing-cta{
-      display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px;
+
+    .landing-box {
+      width: min(960px, 92vw);
+      background: rgba(255, 255, 255, .78);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 40px;
+      padding: 30px;
     }
-    .landing-btn{
-      border:1px solid var(--border); background:white; border-radius:26px; padding:18px;
-      min-height:132px; cursor:pointer; text-align:left; box-shadow:var(--shadow2); font:inherit;
-      transition:.2s ease;
+
+    .landing-head {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      align-items: center
     }
-    .landing-btn:hover{transform:translateY(-2px); border-color:#b9d2ff}
-    .landing-btn strong{display:block; margin-top:10px; font-size:1rem}
-    .landing-btn span{color:var(--muted); font-size:.92rem; line-height:1.5}
-    .icon{
-      width:46px; height:46px; border-radius:16px; display:grid; place-items:center;
-      background:#edf5ff; color:var(--blue); font-size:1.15rem; font-weight:900;
+
+    .landing-cta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
     }
-    .note{font-size:.92rem; color:var(--muted); line-height:1.7}
-    .empty{
-      padding:24px; text-align:center; color:var(--muted); background:white; border:1px dashed #cfe0ff; border-radius:22px;
+
+    .landing-btn {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 26px;
+      padding: 18px;
+      min-height: 132px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: var(--shadow2);
+      font: inherit;
+      transition: .2s ease;
     }
-    .footer{
-      margin-top:18px; color:var(--muted); font-size:.92rem; text-align:center;
+
+    .landing-btn:hover {
+      transform: translateY(-2px);
+      border-color: #b9d2ff
     }
-    @media (max-width: 940px){
-      .hero-grid,.layout-2,.layout-3,.cards,.landing-head,.landing-cta{grid-template-columns:1fr}
-      .stat-grid{grid-template-columns:repeat(2,1fr)}
-      .shell{width:min(96vw,1240px)}
+
+    .landing-btn strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 1rem
     }
-    @media (max-width: 640px){
-      .hero{padding:18px}
-      .panel{padding:18px}
-      .stat-grid{grid-template-columns:1fr}
-      .title{font-size:2.1rem}
-      .avatar{width:88px;height:88px;border-radius:22px}
+
+    .landing-btn span {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.5
+    }
+
+    .icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #edf5ff;
+      color: var(--blue);
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .note {
+      font-size: .92rem;
+      color: var(--muted);
+      line-height: 1.7
+    }
+
+    .empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      background: white;
+      border: 1px dashed #cfe0ff;
+      border-radius: 22px;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: .92rem;
+      text-align: center;
+    }
+
+    @media (max-width: 940px) {
+
+      .hero-grid,
+      .layout-2,
+      .layout-3,
+      .cards,
+      .landing-head,
+      .landing-cta {
+        grid-template-columns: 1fr
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .shell {
+        width: min(96vw, 1240px)
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding: 18px
+      }
+
+      .panel {
+        padding: 18px
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr
+      }
+
+      .title {
+        font-size: 2.1rem
+      }
+
+      .avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 22px
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="landing" id="landing">
     <div class="landing-box">
@@ -276,7 +666,9 @@
             </div>
           </div>
           <h1 class="title">Ton site, <span class="accent">refait de zéro</span></h1>
-          <p class="subtitle">Une page d’accueil claire avec tes infos principales, une page statistiques détaillée, et la progression complète comme sur le site de base, le tout en statique pour GitHub Pages et connecté à Supabase.</p>
+          <p class="subtitle">Une page d’accueil claire avec tes infos principales, une page statistiques détaillée, et
+            la progression complète comme sur le site de base, le tout en statique pour GitHub Pages et connecté à
+            Supabase.</p>
           <div class="hero-actions">
             <button class="nav cta" data-open="home">Accueil</button>
             <button class="nav" data-open="info">Info</button>
@@ -290,10 +682,22 @@
             <span class="muted">édition simple</span>
           </div>
           <div class="stat-grid" id="landingStats">
-            <div class="stat"><div class="kicker">Heures de jeu</div><div class="value blue">—</div></div>
-            <div class="stat"><div class="kicker">Extremes terminés</div><div class="value blue">—</div></div>
-            <div class="stat"><div class="kicker">Rank pays</div><div class="value blue">—</div></div>
-            <div class="stat"><div class="kicker">Rank global</div><div class="value blue">—</div></div>
+            <div class="stat">
+              <div class="kicker">Heures de jeu</div>
+              <div class="value blue">—</div>
+            </div>
+            <div class="stat">
+              <div class="kicker">Extremes terminés</div>
+              <div class="value blue">—</div>
+            </div>
+            <div class="stat">
+              <div class="kicker">Rank pays</div>
+              <div class="value blue">—</div>
+            </div>
+            <div class="stat">
+              <div class="kicker">Rank global</div>
+              <div class="value blue">—</div>
+            </div>
           </div>
         </div>
       </div>
@@ -338,7 +742,8 @@
       <div class="hero-grid">
         <div class="panel">
           <h1 class="title">Bienvenue sur <span class="accent" id="heroName">ton site</span></h1>
-          <p class="subtitle" id="heroText">Charge tes données depuis Supabase pour afficher ton hardest, tes heures de jeu, ton rank AREDL et ton classement Pointercrate avec un design sobre blanc et bleu.</p>
+          <p class="subtitle" id="heroText">Charge tes données depuis Supabase pour afficher ton hardest, tes heures de
+            jeu, ton rank AREDL et ton classement Pointercrate avec un design sobre blanc et bleu.</p>
           <div class="hero-actions">
             <button class="nav cta" data-view="progress">Voir la progression</button>
             <button class="nav" data-view="stats">Voir les stats</button>
@@ -395,12 +800,30 @@
               <span class="muted">supabase</span>
             </div>
             <div class="stat-grid">
-              <div class="stat"><div class="kicker">Heures de jeu</div><div class="value blue" id="infoHours">—</div></div>
-              <div class="stat"><div class="kicker">Extremes terminés</div><div class="value blue" id="infoExtremes">—</div></div>
-              <div class="stat"><div class="kicker">Rank pays</div><div class="value blue" id="infoCountryRank">—</div></div>
-              <div class="stat"><div class="kicker">Rank global</div><div class="value blue" id="infoGlobalRank">—</div></div>
-              <div class="stat"><div class="kicker">AREDL</div><div class="value blue" id="infoAredl">—</div></div>
-              <div class="stat"><div class="kicker">Pointercrate</div><div class="value blue" id="infoPointercrate">—</div></div>
+              <div class="stat">
+                <div class="kicker">Heures de jeu</div>
+                <div class="value blue" id="infoHours">—</div>
+              </div>
+              <div class="stat">
+                <div class="kicker">Extremes terminés</div>
+                <div class="value blue" id="infoExtremes">—</div>
+              </div>
+              <div class="stat">
+                <div class="kicker">Rank pays</div>
+                <div class="value blue" id="infoCountryRank">—</div>
+              </div>
+              <div class="stat">
+                <div class="kicker">Rank global</div>
+                <div class="value blue" id="infoGlobalRank">—</div>
+              </div>
+              <div class="stat">
+                <div class="kicker">AREDL</div>
+                <div class="value blue" id="infoAredl">—</div>
+              </div>
+              <div class="stat">
+                <div class="kicker">Pointercrate</div>
+                <div class="value blue" id="infoPointercrate">—</div>
+              </div>
             </div>
           </div>
         </div>
@@ -408,9 +831,18 @@
 
       <section class="view" id="view-stats" style="margin-top:18px;">
         <div class="layout-3">
-          <div class="small-card"><div class="kicker">Enjoyment moyen</div><div class="big" id="statEnjoyAvg">—</div></div>
-          <div class="small-card"><div class="kicker">Attempts moyens</div><div class="big" id="statAttemptsAvg">—</div></div>
-          <div class="small-card"><div class="kicker">Worst death</div><div class="big" id="statWorstDeath">—</div></div>
+          <div class="small-card">
+            <div class="kicker">Enjoyment moyen</div>
+            <div class="big" id="statEnjoyAvg">—</div>
+          </div>
+          <div class="small-card">
+            <div class="kicker">Attempts moyens</div>
+            <div class="big" id="statAttemptsAvg">—</div>
+          </div>
+          <div class="small-card">
+            <div class="kicker">Worst death</div>
+            <div class="big" id="statWorstDeath">—</div>
+          </div>
         </div>
 
         <div style="height:18px"></div>
@@ -505,8 +937,8 @@
 
   <script>
     const CONFIG = {
-      supabaseUrl: "REPLACE_SUPABASE_URL",
-      supabaseAnonKey: "REPLACE_SUPABASE_ANON_KEY",
+      supabaseUrl: "https://qpexkrzqypvyjhrlaela.supabase.co",
+      supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZXhrcnpxeXB2eWpocmxhZWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MjAxNTUsImV4cCI6MjA5Njk5NjE1NX0.lUKWTH3Zr0MHdUCNpIrtWaWPOgaTVWQz1Zid9n7JT7Q",
       profileSlug: "main",
       categories: ["timings", "wave", "ship", "dual", "cps", "micro", "memory"]
     };
@@ -527,12 +959,12 @@
     };
 
     const DEMO_LEVELS = [
-      { name:"Kyouki", status:"done", top_rank:"#41", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80", completion_date:"2025-11-14", attempts:1840, enjoyment:8.5, worst_death:"94%", progress:100, categories:["timings","memory"] },
-      { name:"Sakupen Circles", status:"done", top_rank:"#28", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1520697222860-7c34d59a141c?auto=format&fit=crop&w=900&q=80", completion_date:"2025-10-02", attempts:2360, enjoyment:9.4, worst_death:"97%", progress:100, categories:["wave","timings"] },
-      { name:"Acheron", status:"active", top_rank:"#12", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80", completion_date:"", attempts:940, enjoyment:8.8, worst_death:"86%", progress:67, categories:["timings","ship"] },
-      { name:"Tartarus", status:"paused", top_rank:"#18", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80", completion_date:"", attempts:520, enjoyment:7.1, worst_death:"81%", progress:33, categories:["ship","dual"] },
-      { name:"Athanatos", status:"done", top_rank:"#61", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&q=80", completion_date:"2025-12-20", attempts:1480, enjoyment:9.0, worst_death:"92%", progress:100, categories:["timings"] },
-      { name:"Edge of Destiny", status:"giveup", top_rank:"#143", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=900&q=80", completion_date:"", attempts:300, enjoyment:5.8, worst_death:"76%", progress:22, categories:["memory","cps"] }
+      { name: "Kyouki", status: "done", top_rank: "#41", difficulty: "Extreme Demon", image_url: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80", completion_date: "2025-11-14", attempts: 1840, enjoyment: 8.5, worst_death: "94%", progress: 100, categories: ["timings", "memory"] },
+      { name: "Sakupen Circles", status: "done", top_rank: "#28", difficulty: "Extreme Demon", image_url: "https://images.unsplash.com/photo-1520697222860-7c34d59a141c?auto=format&fit=crop&w=900&q=80", completion_date: "2025-10-02", attempts: 2360, enjoyment: 9.4, worst_death: "97%", progress: 100, categories: ["wave", "timings"] },
+      { name: "Acheron", status: "active", top_rank: "#12", difficulty: "Extreme Demon", image_url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80", completion_date: "", attempts: 940, enjoyment: 8.8, worst_death: "86%", progress: 67, categories: ["timings", "ship"] },
+      { name: "Tartarus", status: "paused", top_rank: "#18", difficulty: "Extreme Demon", image_url: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80", completion_date: "", attempts: 520, enjoyment: 7.1, worst_death: "81%", progress: 33, categories: ["ship", "dual"] },
+      { name: "Athanatos", status: "done", top_rank: "#61", difficulty: "Extreme Demon", image_url: "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&q=80", completion_date: "2025-12-20", attempts: 1480, enjoyment: 9.0, worst_death: "92%", progress: 100, categories: ["timings"] },
+      { name: "Edge of Destiny", status: "giveup", top_rank: "#143", difficulty: "Extreme Demon", image_url: "https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=900&q=80", completion_date: "", attempts: 300, enjoyment: 5.8, worst_death: "76%", progress: 22, categories: ["memory", "cps"] }
     ];
 
     let profile = { ...DEMO_PROFILE };
@@ -549,7 +981,7 @@
       return Number.isFinite(n) ? n : 999999;
     };
     const fmt = (v) => new Intl.NumberFormat("fr-FR").format(v);
-    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
     const statusClass = (s) => ({
       done: "done",
       active: "active",
@@ -579,13 +1011,13 @@
     function getHardest(list) {
       const done = list.filter(l => l.status === "done");
       if (!done.length) return null;
-      return [...done].sort((a,b) => parseRank(a.top_rank) - parseRank(b.top_rank))[0];
+      return [...done].sort((a, b) => parseRank(a.top_rank) - parseRank(b.top_rank))[0];
     }
 
     function buildSummary() {
       const hardest = getHardest(levels);
       const doneCount = levels.filter(l => l.status === "done").length;
-      const avgEnjoy = levels.filter(l => l.enjoyment != null).reduce((a,b) => a + parseFloat(b.enjoyment), 0) / Math.max(levels.filter(l => l.enjoyment != null).length,1);
+      const avgEnjoy = levels.filter(l => l.enjoyment != null).reduce((a, b) => a + parseFloat(b.enjoyment), 0) / Math.max(levels.filter(l => l.enjoyment != null).length, 1);
       return [
         { label: "Heures de jeu", value: profile.hours_played ? fmt(profile.hours_played) : "—" },
         { label: "Extremes terminés", value: profile.extremes_finished ?? doneCount ?? "—" },
@@ -598,7 +1030,7 @@
 
     function renderLanding() {
       const landingStats = document.getElementById("landingStats");
-      landingStats.innerHTML = buildSummary().slice(0,4).map(s => `
+      landingStats.innerHTML = buildSummary().slice(0, 4).map(s => `
         <div class="stat"><div class="kicker">${esc(s.label)}</div><div class="value blue">${esc(s.value)}</div></div>
       `).join("");
     }
@@ -643,8 +1075,8 @@
 
       const recent = [...levels]
         .filter(l => l.completion_date)
-        .sort((a,b) => new Date(b.completion_date) - new Date(a.completion_date))
-        .slice(0,3);
+        .sort((a, b) => new Date(b.completion_date) - new Date(a.completion_date))
+        .slice(0, 3);
 
       document.getElementById("recentProgress").innerHTML = recent.length ? recent.map(levelCard).join("") : `<div class="empty">Aucune complétion récente.</div>`;
     }
@@ -676,10 +1108,10 @@
       if (search) list = list.filter(l => String(l.name || "").toLowerCase().includes(search));
       if (status !== "all") list = list.filter(l => l.status === status);
 
-      if (sort === "hardest") list.sort((a,b) => parseRank(a.top_rank) - parseRank(b.top_rank));
-      if (sort === "attempts") list.sort((a,b) => parseNum(b.attempts) - parseNum(a.attempts));
-      if (sort === "date") list.sort((a,b) => new Date(b.completion_date || 0) - new Date(a.completion_date || 0));
-      if (sort === "enjoyment") list.sort((a,b) => parseFloat(b.enjoyment || 0) - parseFloat(a.enjoyment || 0));
+      if (sort === "hardest") list.sort((a, b) => parseRank(a.top_rank) - parseRank(b.top_rank));
+      if (sort === "attempts") list.sort((a, b) => parseNum(b.attempts) - parseNum(a.attempts));
+      if (sort === "date") list.sort((a, b) => new Date(b.completion_date || 0) - new Date(a.completion_date || 0));
+      if (sort === "enjoyment") list.sort((a, b) => parseFloat(b.enjoyment || 0) - parseFloat(a.enjoyment || 0));
 
       document.getElementById("progressCount").textContent = `${list.length} niveau(x) affiché(s) sur ${levels.length}.`;
       document.getElementById("levelsGrid").innerHTML = list.length ? list.map(levelCard).join("") : `<div class="empty" style="grid-column:1/-1">Aucun niveau ne correspond aux filtres.</div>`;
@@ -701,12 +1133,12 @@
               <span class="tag">Enjoyment: ${esc(level.enjoyment ?? "—")}/10</span>
               <span class="tag">Worst death: ${esc(level.worst_death ?? "—")}</span>
             </div>
-            <div class="progress" aria-label="progression"><span style="width:${Math.max(0,Math.min(100, level.progress ?? 0))}%"></span></div>
+            <div class="progress" aria-label="progression"><span style="width:${Math.max(0, Math.min(100, level.progress ?? 0))}%"></span></div>
           </div>
         </article>`;
     }
 
-    function destroyChart(id){
+    function destroyChart(id) {
       if (charts[id]) { charts[id].destroy(); charts[id] = null; }
     }
 
@@ -715,8 +1147,8 @@
       const enjoymentVals = done.map(l => parseFloat(l.enjoyment)).filter(v => Number.isFinite(v));
       const attemptsVals = done.map(l => parseNum(l.attempts)).filter(v => v > 0);
       const worstDeaths = done.map(l => parseNum(l.worst_death));
-      const avgEnjoy = enjoymentVals.length ? enjoymentVals.reduce((a,b) => a+b,0) / enjoymentVals.length : 0;
-      const avgAttempts = attemptsVals.length ? attemptsVals.reduce((a,b) => a+b,0) / attemptsVals.length : 0;
+      const avgEnjoy = enjoymentVals.length ? enjoymentVals.reduce((a, b) => a + b, 0) / enjoymentVals.length : 0;
+      const avgAttempts = attemptsVals.length ? attemptsVals.reduce((a, b) => a + b, 0) / attemptsVals.length : 0;
       const worstDeath = worstDeaths.length ? Math.max(...worstDeaths) : 0;
 
       document.getElementById("statEnjoyAvg").textContent = done.length ? `${avgEnjoy.toFixed(1)}/10` : "—";
@@ -734,11 +1166,11 @@
         </div>
         <div class="small-card">
           <div class="kicker">Total attempts</div>
-          <div class="big">${attemptsVals.length ? fmt(attemptsVals.reduce((a,b) => a+b,0)) : "—"}</div>
+          <div class="big">${attemptsVals.length ? fmt(attemptsVals.reduce((a, b) => a + b, 0)) : "—"}</div>
         </div>
       `;
 
-      const doneByEnjoy = [...done].sort((a,b) => parseFloat(b.enjoyment || 0) - parseFloat(a.enjoyment || 0)).slice(0,8);
+      const doneByEnjoy = [...done].sort((a, b) => parseFloat(b.enjoyment || 0) - parseFloat(a.enjoyment || 0)).slice(0, 8);
       document.getElementById("categoryHardest").innerHTML = buildCategoryHardest().join("");
 
       renderCharts();
@@ -750,7 +1182,7 @@
       const categories = profile.custom_categories?.length ? profile.custom_categories : CONFIG.categories;
       return categories.map(cat => {
         const matches = levels.filter(l => (l.categories || []).includes(cat) && l.status === "done");
-        const hardest = matches.length ? matches.sort((a,b) => parseRank(a.top_rank) - parseRank(b.top_rank))[0] : null;
+        const hardest = matches.length ? matches.sort((a, b) => parseRank(a.top_rank) - parseRank(b.top_rank))[0] : null;
         return `
           <div class="small-card">
             <div class="kicker">${esc(cat)}</div>
@@ -767,36 +1199,36 @@
       destroyChart("chartYearly");
 
       const done = levels.filter(l => l.status === "done");
-      const enjoySorted = [...done].filter(l => l.enjoyment != null).sort((a,b) => parseFloat(b.enjoyment) - parseFloat(a.enjoyment)).slice(0,8);
+      const enjoySorted = [...done].filter(l => l.enjoyment != null).sort((a, b) => parseFloat(b.enjoyment) - parseFloat(a.enjoyment)).slice(0, 8);
       charts.chartEnjoyment = new Chart(document.getElementById("chartEnjoyment"), {
         type: "bar",
         data: {
           labels: enjoySorted.map(l => l.name),
           datasets: [{ label: "Enjoyment /10", data: enjoySorted.map(l => parseFloat(l.enjoyment)), borderWidth: 0 }]
         },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, max:10 } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 10 } } }
       });
 
-      const worstSorted = [...done].filter(l => l.worst_death != null).sort((a,b) => parseNum(b.worst_death) - parseNum(a.worst_death)).slice(0,8);
+      const worstSorted = [...done].filter(l => l.worst_death != null).sort((a, b) => parseNum(b.worst_death) - parseNum(a.worst_death)).slice(0, 8);
       charts.chartWorstDeath = new Chart(document.getElementById("chartWorstDeath"), {
         type: "doughnut",
         data: {
           labels: worstSorted.map(l => l.name),
           datasets: [{ data: worstSorted.map(l => parseNum(l.worst_death)), borderWidth: 0 }]
         },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:"bottom" } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
       });
 
-      const months = Array.from({length:12}, (_,i) => i);
+      const months = Array.from({ length: 12 }, (_, i) => i);
       const monthCounts = months.map(() => 0);
       done.forEach(l => { if (l.completion_date) monthCounts[new Date(l.completion_date).getMonth()]++; });
       charts.chartMonthly = new Chart(document.getElementById("chartMonthly"), {
         type: "line",
         data: {
-          labels: ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"],
-          datasets: [{ label: "Terminé", data: monthCounts, tension:.35, fill:true, borderWidth:2 }]
+          labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"],
+          datasets: [{ label: "Terminé", data: monthCounts, tension: .35, fill: true, borderWidth: 2 }]
         },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
       });
 
       const yearCounts = {};
@@ -808,13 +1240,13 @@
       const years = Object.keys(yearCounts).sort();
       charts.chartYearly = new Chart(document.getElementById("chartYearly"), {
         type: "bar",
-        data: { labels: years.length ? years : ["—"], datasets: [{ label:"Completions", data: years.length ? years.map(y => yearCounts[y]) : [0], borderWidth:0 }] },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+        data: { labels: years.length ? years : ["—"], datasets: [{ label: "Completions", data: years.length ? years.map(y => yearCounts[y]) : [0], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
       });
     }
 
-    function renderMonthlyTable() {}
-    function renderYearlyTable() {}
+    function renderMonthlyTable() { }
+    function renderYearlyTable() { }
 
     async function loadData() {
       try {
@@ -836,7 +1268,7 @@
       }
     }
 
-    function renderAll(){
+    function renderAll() {
       renderLanding();
       renderHome();
       renderInfo();
@@ -863,4 +1295,5 @@
     document.addEventListener("DOMContentLoaded", loadData);
   </script>
 </body>
+
 </html>
