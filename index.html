@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geometry Dash | Refonte</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5f9ff;
+      --panel:rgba(255,255,255,.82);
+      --panel-solid:#ffffff;
+      --border:#d9e7ff;
+      --text:#0f172a;
+      --muted:#5c6b84;
+      --blue:#2f7df6;
+      --blue2:#6aa8ff;
+      --blue3:#dcebff;
+      --shadow:0 18px 50px rgba(47,125,246,.10);
+      --shadow2:0 8px 24px rgba(15,23,42,.06);
+      --radius:28px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(47,125,246,.10), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(106,168,255,.14), transparent 30%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .shell{width:min(1240px,92vw); margin:0 auto; padding:28px 0 64px}
+    .hero{
+      background:var(--panel);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:40px;
+      padding:28px;
+      backdrop-filter: blur(12px);
+    }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; font-weight:900;
+      letter-spacing:-0.03em;
+    }
+    .brand-badge{
+      width:42px; height:42px; border-radius:14px; display:grid; place-items:center;
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+      color:white; box-shadow:0 12px 24px rgba(47,125,246,.22);
+    }
+    .brand small{display:block; font-size:12px; color:var(--muted); font-weight:600; letter-spacing:0}
+    .nav{
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .nav button,.pill,.ghost{
+      border:1px solid var(--border);
+      background:var(--panel-solid);
+      color:var(--text);
+      border-radius:999px;
+      padding:12px 18px;
+      font:inherit;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+      box-shadow:var(--shadow2);
+    }
+    .nav button:hover,.pill:hover,.ghost:hover{transform:translateY(-1px); border-color:#b9d2ff}
+    .nav button.active,.pill.active{
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+      color:white;
+      border-color:transparent;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.3fr .9fr;
+      gap:18px;
+      margin-top:18px;
+    }
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow2);
+      border-radius:var(--radius);
+      padding:22px;
+      backdrop-filter: blur(10px);
+    }
+    .title{
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height:1;
+      margin:0 0 12px;
+      letter-spacing:-.05em;
+    }
+    .title .accent{
+      color:var(--blue);
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+      max-width:62ch;
+      font-size:1rem;
+    }
+    .hero-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+    .cta{
+      border:none;
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+      color:white;
+      box-shadow:0 16px 32px rgba(47,125,246,.18);
+    }
+    .stat-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .stat{
+      background:white;
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:16px;
+    }
+    .kicker{font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em}
+    .value{margin-top:6px; font-size:1.55rem; font-weight:900; letter-spacing:-.04em}
+    .value.blue{color:var(--blue)}
+    .value.small{font-size:1.15rem}
+    .views{margin-top:18px}
+    .view{display:none}
+    .view.active{display:block; animation:fadeIn .25s ease}
+    @keyframes fadeIn{from{opacity:.4; transform:translateY(8px)} to{opacity:1; transform:translateY(0)}}
+
+    .layout-2{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
+    .layout-3{display:grid; grid-template-columns: repeat(3,1fr); gap:18px}
+    .section-title{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      margin:0 0 16px;
+    }
+    h2{margin:0; font-size:1.2rem; letter-spacing:-.03em}
+    .muted{color:var(--muted)}
+    .profile{
+      display:flex; gap:18px; align-items:center; flex-wrap:wrap;
+    }
+    .avatar{
+      width:104px; height:104px; border-radius:28px; object-fit:cover;
+      border:4px solid white; box-shadow:0 16px 32px rgba(47,125,246,.18);
+      background:#fff;
+    }
+    .profile h3{margin:0; font-size:1.8rem}
+    .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    .chip{
+      background:#edf5ff; border:1px solid #d7e7ff; color:#1f4ea0;
+      padding:10px 14px; border-radius:999px; font-weight:700; font-size:.92rem;
+    }
+    .chip strong{color:var(--blue)}
+    .input, select{
+      width:100%; border:1px solid var(--border); background:white;
+      padding:12px 14px; border-radius:16px; font:inherit; color:var(--text); outline:none;
+      box-shadow:var(--shadow2);
+    }
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px}
+    .toolbar > *{flex:1 1 180px}
+    .cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+    .card{
+      background:white; border:1px solid var(--border); border-radius:24px; overflow:hidden;
+      box-shadow:var(--shadow2);
+    }
+    .card .inner{padding:18px}
+    .card img{width:100%; height:150px; object-fit:cover; display:block; background:#eaf2ff}
+    .card h3{margin:0 0 6px; font-size:1.05rem}
+    .card p{margin:0; color:var(--muted); line-height:1.65; font-size:.95rem}
+    .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+    .tag{
+      display:inline-flex; align-items:center; gap:6px; padding:7px 10px;
+      border-radius:999px; background:#edf5ff; color:#1f4ea0; border:1px solid #d7e7ff;
+      font-size:.82rem; font-weight:700;
+    }
+    .status{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:7px 10px; border-radius:999px; font-size:.82rem; font-weight:800;
+      background:#edf5ff; color:#1f4ea0;
+    }
+    .status.done{background:#e7f8ef; color:#12704c}
+    .status.active{background:#eef4ff; color:#2f7df6}
+    .status.paused{background:#f2f4f8; color:#55637a}
+    .status.giveup{background:#fff0f0; color:#b42318}
+    .progress{
+      height:10px; background:#e7eefb; border-radius:999px; overflow:hidden; margin-top:10px;
+    }
+    .progress > span{
+      display:block; height:100%; border-radius:999px;
+      background:linear-gradient(135deg,var(--blue),var(--blue2));
+    }
+    .grid-tight{display:grid; gap:14px}
+    .small-card{
+      background:white; border:1px solid var(--border); border-radius:22px; padding:16px;
+    }
+    .small-card .big{font-size:1.3rem; font-weight:900; margin-top:6px}
+    .chart-wrap{height:320px}
+    canvas{max-width:100%}
+    table{width:100%; border-collapse:collapse}
+    th,td{padding:12px 10px; text-align:left; border-bottom:1px solid #edf2ff}
+    th{font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+    tr:hover td{background:#f8fbff}
+    .landing{
+      position:fixed; inset:0; background:
+        radial-gradient(circle at top left, rgba(47,125,246,.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(106,168,255,.18), transparent 34%),
+        #f7fbff;
+      display:flex; align-items:center; justify-content:center; z-index:9999;
+      transition:opacity .35s ease, transform .35s ease;
+    }
+    .landing.exit{opacity:0; transform:scale(1.02); pointer-events:none}
+    .landing-box{
+      width:min(960px,92vw);
+      background:rgba(255,255,255,.78); backdrop-filter: blur(12px);
+      border:1px solid var(--border); box-shadow:var(--shadow);
+      border-radius:40px; padding:30px;
+    }
+    .landing-head{display:grid; grid-template-columns:1.1fr .9fr; gap:18px; align-items:center}
+    .landing-cta{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px;
+    }
+    .landing-btn{
+      border:1px solid var(--border); background:white; border-radius:26px; padding:18px;
+      min-height:132px; cursor:pointer; text-align:left; box-shadow:var(--shadow2); font:inherit;
+      transition:.2s ease;
+    }
+    .landing-btn:hover{transform:translateY(-2px); border-color:#b9d2ff}
+    .landing-btn strong{display:block; margin-top:10px; font-size:1rem}
+    .landing-btn span{color:var(--muted); font-size:.92rem; line-height:1.5}
+    .icon{
+      width:46px; height:46px; border-radius:16px; display:grid; place-items:center;
+      background:#edf5ff; color:var(--blue); font-size:1.15rem; font-weight:900;
+    }
+    .note{font-size:.92rem; color:var(--muted); line-height:1.7}
+    .empty{
+      padding:24px; text-align:center; color:var(--muted); background:white; border:1px dashed #cfe0ff; border-radius:22px;
+    }
+    .footer{
+      margin-top:18px; color:var(--muted); font-size:.92rem; text-align:center;
+    }
+    @media (max-width: 940px){
+      .hero-grid,.layout-2,.layout-3,.cards,.landing-head,.landing-cta{grid-template-columns:1fr}
+      .stat-grid{grid-template-columns:repeat(2,1fr)}
+      .shell{width:min(96vw,1240px)}
+    }
+    @media (max-width: 640px){
+      .hero{padding:18px}
+      .panel{padding:18px}
+      .stat-grid{grid-template-columns:1fr}
+      .title{font-size:2.1rem}
+      .avatar{width:88px;height:88px;border-radius:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="landing" id="landing">
+    <div class="landing-box">
+      <div class="landing-head">
+        <div>
+          <div class="brand">
+            <div class="brand-badge">GD</div>
+            <div>
+              <div>Geometry Dash Hub</div>
+              <small>Refonte sobre blanche et bleue</small>
+            </div>
+          </div>
+          <h1 class="title">Ton site, <span class="accent">refait de zéro</span></h1>
+          <p class="subtitle">Une page d’accueil claire avec tes infos principales, une page statistiques détaillée, et la progression complète comme sur le site de base, le tout en statique pour GitHub Pages et connecté à Supabase.</p>
+          <div class="hero-actions">
+            <button class="nav cta" data-open="home">Accueil</button>
+            <button class="nav" data-open="info">Info</button>
+            <button class="nav" data-open="stats">Statistiques</button>
+            <button class="nav" data-open="progress">Progression</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="section-title">
+            <h2>Aperçu</h2>
+            <span class="muted">édition simple</span>
+          </div>
+          <div class="stat-grid" id="landingStats">
+            <div class="stat"><div class="kicker">Heures de jeu</div><div class="value blue">—</div></div>
+            <div class="stat"><div class="kicker">Extremes terminés</div><div class="value blue">—</div></div>
+            <div class="stat"><div class="kicker">Rank pays</div><div class="value blue">—</div></div>
+            <div class="stat"><div class="kicker">Rank global</div><div class="value blue">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="landing-cta">
+        <button class="landing-btn" data-open="info">
+          <div class="icon">ℹ️</div>
+          <strong>Infos</strong>
+          <span>Photo de profil, heures, ranks AREDL / Pointercrate, et extrems terminés.</span>
+        </button>
+        <button class="landing-btn" data-open="stats">
+          <div class="icon">📊</div>
+          <strong>Statistiques</strong>
+          <span>Enjoyment, worst death, attempts moyens, complétions par mois / année, catégories.</span>
+        </button>
+        <button class="landing-btn" data-open="progress">
+          <div class="icon">🎮</div>
+          <strong>Progression</strong>
+          <span>La liste des niveaux, avec filtres, tri, recherche et cartes propres.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="hero">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-badge">GD</div>
+          <div>
+            <div id="profileName">Geometry Dash Hub</div>
+            <small id="profileTag">Supabase + GitHub Pages</small>
+          </div>
+        </div>
+        <div class="nav">
+          <button class="active" data-view="home">Accueil</button>
+          <button data-view="info">Info</button>
+          <button data-view="stats">Statistiques</button>
+          <button data-view="progress">Progression</button>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="panel">
+          <h1 class="title">Bienvenue sur <span class="accent" id="heroName">ton site</span></h1>
+          <p class="subtitle" id="heroText">Charge tes données depuis Supabase pour afficher ton hardest, tes heures de jeu, ton rank AREDL et ton classement Pointercrate avec un design sobre blanc et bleu.</p>
+          <div class="hero-actions">
+            <button class="nav cta" data-view="progress">Voir la progression</button>
+            <button class="nav" data-view="stats">Voir les stats</button>
+            <button class="nav" data-view="info">Voir les infos</button>
+          </div>
+          <div class="chips" id="heroChips"></div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>Résumé rapide</h2>
+            <span class="muted">hardest + infos</span>
+          </div>
+          <div class="grid-tight" id="homeSummary"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="views">
+      <section class="view active" id="view-home" style="margin-top:18px;">
+        <div class="layout-2">
+          <div class="panel">
+            <div class="section-title">
+              <h2>Progression récente</h2>
+              <span class="muted">aperçu</span>
+            </div>
+            <div id="recentProgress"></div>
+          </div>
+          <div class="panel">
+            <div class="section-title">
+              <h2>Hardest</h2>
+              <span class="muted">niveau terminé le plus dur</span>
+            </div>
+            <div id="hardestBlock"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-info" style="margin-top:18px;">
+        <div class="layout-2">
+          <div class="panel">
+            <div class="profile">
+              <img id="profileImage" class="avatar" alt="photo de profil">
+              <div>
+                <h3 id="infoName">Profil</h3>
+                <p class="note" id="infoBio">Bio du joueur.</p>
+                <div class="chips" id="infoChips"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-title">
+              <h2>Chiffres principaux</h2>
+              <span class="muted">supabase</span>
+            </div>
+            <div class="stat-grid">
+              <div class="stat"><div class="kicker">Heures de jeu</div><div class="value blue" id="infoHours">—</div></div>
+              <div class="stat"><div class="kicker">Extremes terminés</div><div class="value blue" id="infoExtremes">—</div></div>
+              <div class="stat"><div class="kicker">Rank pays</div><div class="value blue" id="infoCountryRank">—</div></div>
+              <div class="stat"><div class="kicker">Rank global</div><div class="value blue" id="infoGlobalRank">—</div></div>
+              <div class="stat"><div class="kicker">AREDL</div><div class="value blue" id="infoAredl">—</div></div>
+              <div class="stat"><div class="kicker">Pointercrate</div><div class="value blue" id="infoPointercrate">—</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-stats" style="margin-top:18px;">
+        <div class="layout-3">
+          <div class="small-card"><div class="kicker">Enjoyment moyen</div><div class="big" id="statEnjoyAvg">—</div></div>
+          <div class="small-card"><div class="kicker">Attempts moyens</div><div class="big" id="statAttemptsAvg">—</div></div>
+          <div class="small-card"><div class="kicker">Worst death</div><div class="big" id="statWorstDeath">—</div></div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="layout-2">
+          <div class="panel">
+            <div class="section-title">
+              <h2>Enjoyment</h2>
+              <span class="muted">répartition</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartEnjoyment"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="section-title">
+              <h2>Worst death</h2>
+              <span class="muted">pire fail par niveau</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartWorstDeath"></canvas></div>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="layout-2">
+          <div class="panel">
+            <div class="section-title">
+              <h2>Complétions par mois</h2>
+              <span class="muted">calendar</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+          </div>
+          <div class="panel">
+            <div class="section-title">
+              <h2>Complétions par année</h2>
+              <span class="muted">calendar</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartYearly"></canvas></div>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="layout-2">
+          <div class="panel">
+            <div class="section-title">
+              <h2>Attempts</h2>
+              <span class="muted">moyenne et top</span>
+            </div>
+            <div id="attemptsList" class="grid-tight"></div>
+          </div>
+          <div class="panel">
+            <div class="section-title">
+              <h2>Hardest par catégories</h2>
+              <span class="muted">catégories personnalisables</span>
+            </div>
+            <div id="categoryHardest" class="grid-tight"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-progress" style="margin-top:18px;">
+        <div class="panel">
+          <div class="section-title">
+            <h2>Progression</h2>
+            <span class="muted">même logique que le site d’origine</span>
+          </div>
+          <div class="toolbar">
+            <input class="input" id="search" placeholder="Chercher un niveau…" />
+            <select id="statusFilter">
+              <option value="all">Tous les statuts</option>
+              <option value="active">En cours</option>
+              <option value="done">Terminés</option>
+              <option value="paused">Pause</option>
+              <option value="giveup">Give up</option>
+            </select>
+            <select id="sortBy">
+              <option value="default">Tri par défaut</option>
+              <option value="hardest">Hardest</option>
+              <option value="attempts">Attempts</option>
+              <option value="date">Date</option>
+              <option value="enjoyment">Enjoyment</option>
+            </select>
+          </div>
+          <div id="progressCount" class="note" style="margin-bottom:14px;"></div>
+          <div class="cards" id="levelsGrid"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">GitHub Pages • Supabase • refonte sobre blanche et bleue</div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      supabaseUrl: "REPLACE_SUPABASE_URL",
+      supabaseAnonKey: "REPLACE_SUPABASE_ANON_KEY",
+      profileSlug: "main",
+      categories: ["timings", "wave", "ship", "dual", "cps", "micro", "memory"]
+    };
+
+    const DEMO_PROFILE = {
+      display_name: "Spleen",
+      image_url: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=900&q=80",
+      bio: "Extreme demons, timings et progression propre.",
+      hours_played: 2600,
+      country_rank: 42,
+      global_rank: 312,
+      aredl_rank: 128,
+      pointercrate_rank: 94,
+      extremes_finished: 16,
+      hardest_title: "Slaughterhouse",
+      hardest_rank: "#7",
+      custom_categories: ["timings", "wave", "ship"]
+    };
+
+    const DEMO_LEVELS = [
+      { name:"Kyouki", status:"done", top_rank:"#41", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80", completion_date:"2025-11-14", attempts:1840, enjoyment:8.5, worst_death:"94%", progress:100, categories:["timings","memory"] },
+      { name:"Sakupen Circles", status:"done", top_rank:"#28", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1520697222860-7c34d59a141c?auto=format&fit=crop&w=900&q=80", completion_date:"2025-10-02", attempts:2360, enjoyment:9.4, worst_death:"97%", progress:100, categories:["wave","timings"] },
+      { name:"Acheron", status:"active", top_rank:"#12", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80", completion_date:"", attempts:940, enjoyment:8.8, worst_death:"86%", progress:67, categories:["timings","ship"] },
+      { name:"Tartarus", status:"paused", top_rank:"#18", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80", completion_date:"", attempts:520, enjoyment:7.1, worst_death:"81%", progress:33, categories:["ship","dual"] },
+      { name:"Athanatos", status:"done", top_rank:"#61", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&q=80", completion_date:"2025-12-20", attempts:1480, enjoyment:9.0, worst_death:"92%", progress:100, categories:["timings"] },
+      { name:"Edge of Destiny", status:"giveup", top_rank:"#143", difficulty:"Extreme Demon", image_url:"https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=900&q=80", completion_date:"", attempts:300, enjoyment:5.8, worst_death:"76%", progress:22, categories:["memory","cps"] }
+    ];
+
+    let profile = { ...DEMO_PROFILE };
+    let levels = [...DEMO_LEVELS];
+    let charts = {};
+    let supabaseClient = null;
+
+    const parseNum = (v) => {
+      const n = Number(String(v ?? "").replace(/[^0-9.]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    };
+    const parseRank = (rank) => {
+      const n = parseInt(String(rank ?? "").replace(/[^0-9]/g, ""), 10);
+      return Number.isFinite(n) ? n : 999999;
+    };
+    const fmt = (v) => new Intl.NumberFormat("fr-FR").format(v);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+    const statusClass = (s) => ({
+      done: "done",
+      active: "active",
+      paused: "paused",
+      giveup: "giveup"
+    }[s] || "paused");
+
+    function setView(view) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll('[data-view]').forEach(b => b.classList.remove("active"));
+      document.getElementById(`view-${view}`).classList.add("active");
+      document.querySelectorAll(`[data-view="${view}"]`).forEach(b => b.classList.add("active"));
+      if (view === "stats") renderStats();
+      if (view === "info") renderInfo();
+      if (view === "progress") renderProgress();
+      if (view === "home") renderHome();
+    }
+
+    function openLandingTarget(view) {
+      document.getElementById("landing").classList.add("exit");
+      setTimeout(() => {
+        document.getElementById("landing").style.display = "none";
+        setView(view);
+      }, 280);
+    }
+
+    function getHardest(list) {
+      const done = list.filter(l => l.status === "done");
+      if (!done.length) return null;
+      return [...done].sort((a,b) => parseRank(a.top_rank) - parseRank(b.top_rank))[0];
+    }
+
+    function buildSummary() {
+      const hardest = getHardest(levels);
+      const doneCount = levels.filter(l => l.status === "done").length;
+      const avgEnjoy = levels.filter(l => l.enjoyment != null).reduce((a,b) => a + parseFloat(b.enjoyment), 0) / Math.max(levels.filter(l => l.enjoyment != null).length,1);
+      return [
+        { label: "Heures de jeu", value: profile.hours_played ? fmt(profile.hours_played) : "—" },
+        { label: "Extremes terminés", value: profile.extremes_finished ?? doneCount ?? "—" },
+        { label: "Rank pays", value: profile.country_rank ? `#${fmt(profile.country_rank)}` : "—" },
+        { label: "Rank global", value: profile.global_rank ? `#${fmt(profile.global_rank)}` : "—" },
+        { label: "AREDL", value: profile.aredl_rank ? `#${fmt(profile.aredl_rank)}` : "—" },
+        { label: "Pointercrate", value: profile.pointercrate_rank ? `#${fmt(profile.pointercrate_rank)}` : "—" },
+      ];
+    }
+
+    function renderLanding() {
+      const landingStats = document.getElementById("landingStats");
+      landingStats.innerHTML = buildSummary().slice(0,4).map(s => `
+        <div class="stat"><div class="kicker">${esc(s.label)}</div><div class="value blue">${esc(s.value)}</div></div>
+      `).join("");
+    }
+
+    function renderHome() {
+      const hardest = getHardest(levels);
+      const summary = buildSummary();
+      document.getElementById("heroName").textContent = profile.display_name || "ton site";
+      document.getElementById("profileName").textContent = profile.display_name || "Geometry Dash Hub";
+      document.getElementById("profileTag").textContent = profile.bio || "Supabase + GitHub Pages";
+      document.getElementById("heroText").textContent = profile.bio || "Un site sobre, rapide et lisible.";
+      document.getElementById("heroChips").innerHTML = summary.map(s => `<span class="chip">${esc(s.label)} <strong>${esc(s.value)}</strong></span>`).join("");
+      document.getElementById("homeSummary").innerHTML = `
+        <div class="small-card">
+          <div class="kicker">Hardest terminé</div>
+          <div class="big">${hardest ? esc(hardest.name) : "—"}</div>
+          <div class="note" style="margin-top:8px">${hardest ? `Top ${esc(hardest.top_rank || "—")} • ${esc(hardest.difficulty || "")}` : "Aucun niveau terminé."}</div>
+        </div>
+        <div class="small-card">
+          <div class="kicker">Infos rapides</div>
+          <div class="note" style="margin-top:8px">
+            <strong>Heures :</strong> ${esc(profile.hours_played ?? "—")}<br>
+            <strong>AREDL :</strong> ${esc(profile.aredl_rank ? `#${profile.aredl_rank}` : "—")}<br>
+            <strong>Pointercrate :</strong> ${esc(profile.pointercrate_rank ? `#${profile.pointercrate_rank}` : "—")}
+          </div>
+        </div>
+      `;
+      document.getElementById("hardestBlock").innerHTML = hardest ? `
+        <div class="card">
+          <img src="${esc(hardest.image_url || profile.image_url || "")}" alt="${esc(hardest.name)}">
+          <div class="inner">
+            <h3>${esc(hardest.name)}</h3>
+            <p>Ton hardest terminé actuellement.</p>
+            <div class="row">
+              <span class="tag">Top ${esc(hardest.top_rank || "—")}</span>
+              <span class="tag">${esc(hardest.difficulty || "Extreme Demon")}</span>
+              <span class="status done">Terminé</span>
+            </div>
+          </div>
+        </div>
+      ` : `<div class="empty">Aucun hardest trouvé.</div>`;
+
+      const recent = [...levels]
+        .filter(l => l.completion_date)
+        .sort((a,b) => new Date(b.completion_date) - new Date(a.completion_date))
+        .slice(0,3);
+
+      document.getElementById("recentProgress").innerHTML = recent.length ? recent.map(levelCard).join("") : `<div class="empty">Aucune complétion récente.</div>`;
+    }
+
+    function renderInfo() {
+      document.getElementById("infoName").textContent = profile.display_name || "Profil";
+      document.getElementById("infoBio").textContent = profile.bio || "";
+      document.getElementById("profileImage").src = profile.image_url || "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=900&q=80";
+      document.getElementById("infoHours").textContent = profile.hours_played ? fmt(profile.hours_played) : "—";
+      document.getElementById("infoExtremes").textContent = profile.extremes_finished ?? "—";
+      document.getElementById("infoCountryRank").textContent = profile.country_rank ? `#${fmt(profile.country_rank)}` : "—";
+      document.getElementById("infoGlobalRank").textContent = profile.global_rank ? `#${fmt(profile.global_rank)}` : "—";
+      document.getElementById("infoAredl").textContent = profile.aredl_rank ? `#${fmt(profile.aredl_rank)}` : "—";
+      document.getElementById("infoPointercrate").textContent = profile.pointercrate_rank ? `#${fmt(profile.pointercrate_rank)}` : "—";
+      const chipValues = [
+        `Hardest: ${profile.hardest_title || "—"}`,
+        `Rank AREDL: ${profile.aredl_rank ? `#${profile.aredl_rank}` : "—"}`,
+        `Pointercrate: ${profile.pointercrate_rank ? `#${profile.pointercrate_rank}` : "—"}`
+      ];
+      document.getElementById("infoChips").innerHTML = chipValues.map(v => `<span class="chip">${esc(v)}</span>`).join("");
+    }
+
+    function renderProgress() {
+      const search = document.getElementById("search").value.trim().toLowerCase();
+      const status = document.getElementById("statusFilter").value;
+      const sort = document.getElementById("sortBy").value;
+
+      let list = [...levels];
+      if (search) list = list.filter(l => String(l.name || "").toLowerCase().includes(search));
+      if (status !== "all") list = list.filter(l => l.status === status);
+
+      if (sort === "hardest") list.sort((a,b) => parseRank(a.top_rank) - parseRank(b.top_rank));
+      if (sort === "attempts") list.sort((a,b) => parseNum(b.attempts) - parseNum(a.attempts));
+      if (sort === "date") list.sort((a,b) => new Date(b.completion_date || 0) - new Date(a.completion_date || 0));
+      if (sort === "enjoyment") list.sort((a,b) => parseFloat(b.enjoyment || 0) - parseFloat(a.enjoyment || 0));
+
+      document.getElementById("progressCount").textContent = `${list.length} niveau(x) affiché(s) sur ${levels.length}.`;
+      document.getElementById("levelsGrid").innerHTML = list.length ? list.map(levelCard).join("") : `<div class="empty" style="grid-column:1/-1">Aucun niveau ne correspond aux filtres.</div>`;
+    }
+
+    function levelCard(level) {
+      return `
+        <article class="card">
+          <img src="${esc(level.image_url || profile.image_url || "")}" alt="${esc(level.name)}">
+          <div class="inner">
+            <h3>${esc(level.name)}</h3>
+            <p>${esc(level.difficulty || "Extreme Demon")} • Top ${esc(level.top_rank || "—")}</p>
+            <div class="row">
+              <span class="status ${statusClass(level.status)}">${esc(level.status || "paused")}</span>
+              ${level.completion_date ? `<span class="tag">Complété le ${new Date(level.completion_date).toLocaleDateString("fr-FR")}</span>` : ""}
+            </div>
+            <div class="row">
+              <span class="tag">Attempts: ${esc(level.attempts ?? "—")}</span>
+              <span class="tag">Enjoyment: ${esc(level.enjoyment ?? "—")}/10</span>
+              <span class="tag">Worst death: ${esc(level.worst_death ?? "—")}</span>
+            </div>
+            <div class="progress" aria-label="progression"><span style="width:${Math.max(0,Math.min(100, level.progress ?? 0))}%"></span></div>
+          </div>
+        </article>`;
+    }
+
+    function destroyChart(id){
+      if (charts[id]) { charts[id].destroy(); charts[id] = null; }
+    }
+
+    function renderStats() {
+      const done = levels.filter(l => l.status === "done");
+      const enjoymentVals = done.map(l => parseFloat(l.enjoyment)).filter(v => Number.isFinite(v));
+      const attemptsVals = done.map(l => parseNum(l.attempts)).filter(v => v > 0);
+      const worstDeaths = done.map(l => parseNum(l.worst_death));
+      const avgEnjoy = enjoymentVals.length ? enjoymentVals.reduce((a,b) => a+b,0) / enjoymentVals.length : 0;
+      const avgAttempts = attemptsVals.length ? attemptsVals.reduce((a,b) => a+b,0) / attemptsVals.length : 0;
+      const worstDeath = worstDeaths.length ? Math.max(...worstDeaths) : 0;
+
+      document.getElementById("statEnjoyAvg").textContent = done.length ? `${avgEnjoy.toFixed(1)}/10` : "—";
+      document.getElementById("statAttemptsAvg").textContent = attemptsVals.length ? fmt(Math.round(avgAttempts)) : "—";
+      document.getElementById("statWorstDeath").textContent = worstDeath ? `${worstDeath}%` : "—";
+
+      document.getElementById("attemptsList").innerHTML = `
+        <div class="small-card">
+          <div class="kicker">Moyenne d'attempts</div>
+          <div class="big">${attemptsVals.length ? fmt(Math.round(avgAttempts)) : "—"}</div>
+        </div>
+        <div class="small-card">
+          <div class="kicker">Niveaux complétés</div>
+          <div class="big">${done.length}</div>
+        </div>
+        <div class="small-card">
+          <div class="kicker">Total attempts</div>
+          <div class="big">${attemptsVals.length ? fmt(attemptsVals.reduce((a,b) => a+b,0)) : "—"}</div>
+        </div>
+      `;
+
+      const doneByEnjoy = [...done].sort((a,b) => parseFloat(b.enjoyment || 0) - parseFloat(a.enjoyment || 0)).slice(0,8);
+      document.getElementById("categoryHardest").innerHTML = buildCategoryHardest().join("");
+
+      renderCharts();
+      renderMonthlyTable();
+      renderYearlyTable();
+    }
+
+    function buildCategoryHardest() {
+      const categories = profile.custom_categories?.length ? profile.custom_categories : CONFIG.categories;
+      return categories.map(cat => {
+        const matches = levels.filter(l => (l.categories || []).includes(cat) && l.status === "done");
+        const hardest = matches.length ? matches.sort((a,b) => parseRank(a.top_rank) - parseRank(b.top_rank))[0] : null;
+        return `
+          <div class="small-card">
+            <div class="kicker">${esc(cat)}</div>
+            <div class="big">${hardest ? esc(hardest.name) : "—"}</div>
+            <div class="note" style="margin-top:6px">${hardest ? `Top ${esc(hardest.top_rank || "—")}` : "Aucun niveau terminé dans cette catégorie."}</div>
+          </div>`;
+      });
+    }
+
+    function renderCharts() {
+      destroyChart("chartEnjoyment");
+      destroyChart("chartWorstDeath");
+      destroyChart("chartMonthly");
+      destroyChart("chartYearly");
+
+      const done = levels.filter(l => l.status === "done");
+      const enjoySorted = [...done].filter(l => l.enjoyment != null).sort((a,b) => parseFloat(b.enjoyment) - parseFloat(a.enjoyment)).slice(0,8);
+      charts.chartEnjoyment = new Chart(document.getElementById("chartEnjoyment"), {
+        type: "bar",
+        data: {
+          labels: enjoySorted.map(l => l.name),
+          datasets: [{ label: "Enjoyment /10", data: enjoySorted.map(l => parseFloat(l.enjoyment)), borderWidth: 0 }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, max:10 } } }
+      });
+
+      const worstSorted = [...done].filter(l => l.worst_death != null).sort((a,b) => parseNum(b.worst_death) - parseNum(a.worst_death)).slice(0,8);
+      charts.chartWorstDeath = new Chart(document.getElementById("chartWorstDeath"), {
+        type: "doughnut",
+        data: {
+          labels: worstSorted.map(l => l.name),
+          datasets: [{ data: worstSorted.map(l => parseNum(l.worst_death)), borderWidth: 0 }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:"bottom" } } }
+      });
+
+      const months = Array.from({length:12}, (_,i) => i);
+      const monthCounts = months.map(() => 0);
+      done.forEach(l => { if (l.completion_date) monthCounts[new Date(l.completion_date).getMonth()]++; });
+      charts.chartMonthly = new Chart(document.getElementById("chartMonthly"), {
+        type: "line",
+        data: {
+          labels: ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"],
+          datasets: [{ label: "Terminé", data: monthCounts, tension:.35, fill:true, borderWidth:2 }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+      });
+
+      const yearCounts = {};
+      done.forEach(l => {
+        if (!l.completion_date) return;
+        const year = new Date(l.completion_date).getFullYear();
+        yearCounts[year] = (yearCounts[year] || 0) + 1;
+      });
+      const years = Object.keys(yearCounts).sort();
+      charts.chartYearly = new Chart(document.getElementById("chartYearly"), {
+        type: "bar",
+        data: { labels: years.length ? years : ["—"], datasets: [{ label:"Completions", data: years.length ? years.map(y => yearCounts[y]) : [0], borderWidth:0 }] },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+      });
+    }
+
+    function renderMonthlyTable() {}
+    function renderYearlyTable() {}
+
+    async function loadData() {
+      try {
+        if (CONFIG.supabaseUrl.includes("REPLACE_") || CONFIG.supabaseAnonKey.includes("REPLACE_")) {
+          renderAll();
+          return;
+        }
+        supabaseClient = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+        const [{ data: profileData, error: pErr }, { data: levelsData, error: lErr }] = await Promise.all([
+          supabaseClient.from("profiles").select("*").eq("slug", CONFIG.profileSlug).maybeSingle(),
+          supabaseClient.from("levels").select("*").eq("profile_slug", CONFIG.profileSlug).order("created_at", { ascending: false })
+        ]);
+        if (!pErr && profileData) profile = profileData;
+        if (!lErr && levelsData?.length) levels = levelsData;
+      } catch (err) {
+        console.warn("Supabase load failed, using demo data:", err);
+      } finally {
+        renderAll();
+      }
+    }
+
+    function renderAll(){
+      renderLanding();
+      renderHome();
+      renderInfo();
+      renderProgress();
+      renderStats();
+      document.getElementById("profileName").textContent = profile.display_name || "Geometry Dash Hub";
+      document.getElementById("profileImage").src = profile.image_url || DEMO_PROFILE.image_url;
+      document.getElementById("heroName").textContent = profile.display_name || "ton site";
+      document.getElementById("heroText").textContent = profile.bio || "Une base propre pour ton site.";
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-view], [data-open]");
+      if (!btn) return;
+      const view = btn.dataset.view || btn.dataset.open;
+      if (btn.dataset.open) openLandingTarget(view);
+      if (btn.dataset.view) setView(view);
+    });
+
+    document.addEventListener("input", (e) => {
+      if (e.target.id === "search" || e.target.id === "statusFilter" || e.target.id === "sortBy") renderProgress();
+    });
+
+    document.addEventListener("DOMContentLoaded", loadData);
+  </script>
+</body>
+</html>
